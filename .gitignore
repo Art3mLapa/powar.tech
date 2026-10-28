@@ -1,0 +1,12 @@
+node_modules/
+.next/
+out/
+.env*
+!.env.example
+*.tsbuildinfo
+.design/
+.test-results/
+next-env.d.ts
+*.log
+AGENTS.md
+README.md

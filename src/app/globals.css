@@ -1,0 +1,94 @@
+@import "tailwindcss";
+
+@theme inline {
+  --font-display: var(--font-bebas), Impact, "Arial Narrow", sans-serif;
+  --color-background: #000;
+  --color-foreground: #f5f5f3;
+}
+
+:root { color-scheme: dark; background: #000; color: #f5f5f3; }
+* { box-sizing: border-box; }
+html { scroll-behavior: auto; scrollbar-width: thin; scrollbar-color: #303030 #000; }
+body { margin: 0; font-family: Arial, Helvetica, sans-serif; -webkit-font-smoothing: antialiased; }
+button, a { -webkit-tap-highlight-color: transparent; }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; }
+button:not(:disabled) { cursor: pointer; }
+button:focus-visible, a:focus-visible { outline: 2px solid currentColor; outline-offset: 7px; }
+::selection { color: #000; background: #f5f5f3; }
+.type-display { font-family: var(--font-display); font-weight: 400; line-height: 1; text-transform: uppercase; }
+.skip-link { position: fixed; z-index: 30; top: 12px; left: 12px; padding: 12px 18px; background: #fff; color: #000; transform: translateY(-160%); }
+.skip-link:focus { transform: translateY(0); }
+
+.experience { position: relative; height: 350svh; }
+.site-header { position: absolute; top: 0; left: 0; z-index: 5; width: 100%; height: 54px; font-size: clamp(17px, 1.5vw, 23px); }
+.experience-sticky { position: sticky; top: 0; height: 100dvh; display: grid; place-items: center; overflow: clip; }
+.hero-title-wrap { position: absolute; inset: 0; display: grid; place-items: center; padding: 24px; z-index: 2; pointer-events: none; }
+.hero-title { margin: 0; font-size: clamp(34px, 5.05vw, 104px); white-space: nowrap; text-align: center; }
+.sequence-layer { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+.sequence-art { width: min(1500px, 150svh, 200vw); aspect-ratio: 16 / 9; flex: none; transform: translateY(calc(50dvh - 50%)); }
+.sequence-art canvas, .sequence-art img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.scroll-hint { position: absolute; z-index: 4; bottom: max(26px, env(safe-area-inset-bottom)); left: 50%; translate: -50% 0; padding: 9px 15px; border: 0; background: none; color: #6c6c6c; font-size: 17px; white-space: nowrap; }
+.scroll-hint:hover { color: #dedede; }
+.noscript-art { display: flex; justify-content: center; overflow: hidden; }
+.noscript-art img { width: min(1500px, 200vw); max-width: none; }
+
+.telegram-section { position: relative; z-index: 1; margin-top: -14svh; padding: 0 24px clamp(30px, 5svh, 64px); scroll-margin-top: 50px; }
+.telegram-content { width: min(100%, 615px); }
+.message { margin: 9px 0; }
+.message img { display: block; max-width: 100%; height: auto; }
+.section-link { text-align: center; }
+.section-link h2 { margin: 0; }
+.section-link a { display: inline-block; transition: filter 180ms, opacity 180ms; }
+.section-link a:hover { filter: brightness(1.3); opacity: 0.85; }
+.telegram-link { margin: 22px -30px 25px; color: #00aeef; font-size: clamp(38px, 5.1vw, 86px); }
+
+.youtube-section { padding: clamp(32px, 6svh, 80px) 24px 0; }
+.youtube-grid { max-width: 1440px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 440px) minmax(0, 1fr); column-gap: 30px; row-gap: 22px; align-items: center; }
+.youtube-comment { grid-area: 1 / 1; justify-self: end; width: 100%; max-width: 400px; }
+.youtube-comment img { display: block; width: 100%; height: auto; }
+.video-first { grid-area: 1 / 2; }
+.youtube-link { grid-area: 2 / 1 / 3 / -1; color: #ff003b; font-size: clamp(36px, 5.05vw, 95px); }
+.video-second { grid-area: 3 / 2; }
+.video-card { margin: 0; }
+.video-window { position: relative; overflow: hidden; width: 100%; aspect-ratio: 16 / 9; border-radius: 9px; background: #111; }
+.video-window iframe { display: block; width: 100%; height: 100%; border: 0; }
+.video-facade { position: absolute; inset: 0; display: grid; place-items: center; width: 100%; height: 100%; border: 0; padding: 0; background: #111; color: #ff003b; }
+.video-thumbnail { position: absolute; inset: 0; display: block; height: 100%; width: 100%; object-fit: cover; transition: transform 450ms; }
+.video-facade:hover .video-thumbnail { transform: scale(1.035); }
+.video-shade { position: absolute; inset: 0; background: linear-gradient(0deg, rgb(0 0 0 / 65%), transparent 50%); }
+.video-play { position: relative; width: 60px; opacity: 0.95; transition: transform 200ms; }
+.video-facade:hover .video-play { transform: scale(1.08); }
+.video-label { position: absolute; bottom: 14px; left: 16px; color: white; font-size: 9px; letter-spacing: 0.14em; }
+.video-card figcaption { padding-top: 12px; font-size: 13px; line-height: 1.45; color: #ddd; }
+.soon-section { min-height: 85svh; padding: 60px 24px; }
+.soon-title { margin: 0; font-size: clamp(54px, 5.1vw, 98px); }
+.soon-subtitle { margin: 3px 0 0; color: #505050; font-size: clamp(18px, 1.5vw, 26px); }
+
+@media (min-width: 1800px) {
+  .site-header { height: 74px; }
+  .telegram-content { width: 868px; }
+  .youtube-grid { max-width: 2048px; grid-template-columns: minmax(0, 1fr) 620px minmax(0, 1fr); }
+  .youtube-comment { max-width: 575px; }
+}
+@media (max-width: 900px) {
+  .youtube-grid { grid-template-columns: minmax(0, 1fr); max-width: 520px; row-gap: 24px; }
+  .youtube-comment { grid-area: auto; justify-self: start; width: 86%; margin-bottom: 8px; }
+  .video-first, .video-second, .youtube-link { grid-area: auto; }
+  .youtube-link { margin: 3px -12px; font-size: clamp(32px, 6.5vw, 62px); }
+  .telegram-link { margin-inline: -8px; font-size: clamp(38px, 7.5vw, 68px); }
+  .hero-title { font-size: clamp(31px, 6.4vw, 57px); }
+}
+@media (max-width: 480px) {
+  .site-header { height: 50px; font-size: 18px; }
+  .hero-title-wrap { padding: 16px; }
+  .hero-title { font-size: clamp(30px, 9vw, 43px); }
+  .telegram-section { padding: 0 16px 32px; }
+  .telegram-link { font-size: clamp(35px, 9vw, 45px); margin-block: 21px; }
+  .youtube-section { padding: 32px 20px 0; }
+  .youtube-link { font-size: clamp(28px, 7.4vw, 35px); }
+  .message { margin-block: 8px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+}
