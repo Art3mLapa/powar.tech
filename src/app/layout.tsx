@@ -3,11 +3,11 @@ import './globals.css'
 import { bebas } from './fonts'
 
 export const metadata: Metadata = {
-	title: 'БИЛДЕРС СЗ ПРОДАКШН — UNDERГРАУНД STAЛZОНА',
+	title: 'БСЗП',
 	description:
 		'Самые отбитые панки в зоне. Подвал Билдеров, видео и андерграунд Сталзона.',
 	openGraph: {
-		title: 'БИЛДЕРС СЗ ПРОДАКШН',
+		title: 'БСЗП',
 		description: 'UNDERГРАУНД STAЛZОНА',
 		locale: 'ru_RU',
 		type: 'website',
