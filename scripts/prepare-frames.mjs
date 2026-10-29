@@ -33,5 +33,5 @@ for (const file of files) {
   frames.push(`/frames/builder/${name}`);
   bytes += buffer.length;
 }
-await writeFile(resolve("src/lib/frame-manifest.json"), JSON.stringify({ width: 1280, height: 720, frames, bottomEdges }, null, 2) + "\n");
+await writeFile(resolve("src/lib/frame-manifest.json"), `${JSON.stringify({ width: 1280, height: 720, frames, bottomEdges }, null, 2)}\n`);
 console.log(`${frames.length} frames · ${(bytes / 1024 / 1024).toFixed(2)} MB total`);
