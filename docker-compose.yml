@@ -1,0 +1,23 @@
+services:
+  bscp_frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    image: bscp_frontend:latest
+
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+
+    ports:
+      - "3000:3000"
+
+    healthcheck:
+      test: [ "CMD", "node", "-e", "fetch('http://localhost:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))" ]
+      interval: 30s
+      timeout: 15s
+      retries: 5
+      start_period: 15s
+
+    restart: unless-stopped
