@@ -139,7 +139,7 @@ bun test apps/worker/test/worker.e2e.test.ts
 
 Пакеты `@bscp/render-contracts`, `@bscp/render-pipeline` и нативный спайк `apps/renderer` выполняют миграцию рендера Xeon из плана `docs/render-migration-plan.md`. Источники не копируются в репозиторий: корpus читается только по env-путям, fixtures выбираются по hash; игровые ресурсы в Git не попадают. Зафиксировано:
 
-- Этап 1 — индекс исходников: `packages/render-pipeline/src/source-set.ts` принимает либо `RENDER_SOURCE_ROOT` с подкаталогами `*_extracted_xeon`, либо отдельные `RENDER_CONFIGS_ROOT`/`RENDER_MATERIALS_ROOT`/`RENDER_SHADERS_ROOT`; namespace refs идут как `assets/<ns>/<path>`, только чтение, matches case-insensitive.
+- Этап 1 — индекс исходников: `packages/render-pipeline/src/source-set.ts` принимает либо `RENDER_SOURCE_ROOT` с подкаталогами `configs`/`materials`/`shaders`, либо отдельные `RENDER_CONFIGS_ROOT`/`RENDER_MATERIALS_ROOT`/`RENDER_SHADERS_ROOT`; namespace refs идут как `assets/<ns>/<path>`, только чтение, matches case-insensitive.
 - Этап 2 — lossless-декодеры: `mcmtl.ts` парсит MCMTL директивы, hook kinds и lighting models с хранением исходного текста; `json-strict.ts` ругается на trailing commas и дубли ключей; `catalog.ts` строит item refs + граф зависимостей.
 - Этап 3 — shader toolchain: `shaders.ts` разворачивает `#include`, unroll циклы (`#unroll_start`) и hook points, `hooks.ts` сопоставляет hook-имена с файлами `mcsahook`; `spike-plan.ts` комбинирует representative programs; `spike-run.ts` гоняет их через нативный EGL-спайк.
 

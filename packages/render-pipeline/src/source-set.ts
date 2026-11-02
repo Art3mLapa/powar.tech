@@ -88,10 +88,8 @@ export async function sourceRootsFromRoot(
 		const info = await stat(full).catch(() => null)
 		if (!info?.isDirectory()) continue
 		const lowered = child.toLowerCase()
-		const matched = KIND_LABELS.find(
-			(kind) =>
-				kind.markers.some((marker) => lowered.includes(marker)) &&
-				lowered.endsWith('_extracted_xeon')
+		const matched = KIND_LABELS.find((kind) =>
+			kind.markers.some((marker) => lowered.includes(marker))
 		)
 		if (matched)
 			roots.push({ kind: matched.kind, label: child, root: full })
