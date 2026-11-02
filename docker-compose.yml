@@ -1,23 +1,114 @@
+name: bscp
+
+x-app-environment: &app-environment
+  NODE_ENV: production
+  DATABASE_URL: postgresql://${POSTGRES_USER:-bscp}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-bscp}
+  STORAGE_DIR: /app/runtime/storage
+  DO_NOT_TRACK: "1"
+  PRISMA_DISABLE_TELEMETRY: "1"
+
 services:
-  bscp_frontend:
+  postgres:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-bscp}
+      POSTGRES_DB: ${POSTGRES_DB:-bscp}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  migrate:
     build:
       context: .
-      dockerfile: Dockerfile
+      target: backend
+    environment:
+      <<: *app-environment
+    command: ["bun", "run", "db:migrate"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
 
-    image: bscp_frontend:latest
+  backend:
+    build:
+      context: .
+      target: backend
+    environment:
+      <<: *app-environment
+      PORT: "3001"
+      WEB_ORIGIN: ${WEB_ORIGIN:?Set public WEB_ORIGIN}
+      TOTP_ENCRYPTION_KEY: ${TOTP_ENCRYPTION_KEY:?Set 64-character hex TOTP_ENCRYPTION_KEY}
+    expose:
+      - "3001"
+    volumes:
+      - asset_storage:/app/runtime/storage
+    healthcheck:
+      test: ["CMD", "bun", "-e", "fetch('http://localhost:3001/ready').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    init: true
+    restart: unless-stopped
 
+  worker:
+    build:
+      context: .
+      target: worker
+    environment:
+      <<: *app-environment
+      SCHEDULER_ENABLED: ${SCHEDULER_ENABLED:-false}
+      AUTH_LINK: ${AUTH_LINK:-}
+      LOGIN: ${LOGIN:-}
+      GLOBAL_AUTH_LINK: ${GLOBAL_AUTH_LINK:-}
+      GLOBAL_LOGIN: ${GLOBAL_LOGIN:-}
+      RENDER_SOURCE_ROOT: ${RENDER_SOURCE_ROOT:-}
+      RENDER_HOOKS: ${RENDER_HOOKS:-}
+      RENDER_TIMEOUT_MS: ${RENDER_TIMEOUT_MS:-}
+      RENDER_PUBLISH: ${RENDER_PUBLISH:-false}
+      RENDER_SCHEDULED: ${RENDER_SCHEDULED:-false}
+      CHROMIUM_NO_SANDBOX: "1"
+    volumes:
+      - asset_storage:/app/runtime/storage
+    shm_size: 256mb
+    init: true
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      target: frontend
+      args:
+        BACKEND_ORIGIN: http://backend:3001
     environment:
       NODE_ENV: production
       PORT: "3000"
-
     ports:
-      - "3000:3000"
-
+      - "${FRONTEND_BIND:-127.0.0.1}:${FRONTEND_PORT:-3000}:3000"
     healthcheck:
-      test: [ "CMD", "node", "-e", "fetch('http://localhost:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))" ]
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
       interval: 30s
-      timeout: 15s
+      timeout: 10s
       retries: 5
-      start_period: 15s
-
+    depends_on:
+      backend:
+        condition: service_healthy
+    init: true
     restart: unless-stopped
+
+volumes:
+  postgres_data:
+    name: ${POSTGRES_VOLUME_NAME:-${COMPOSE_PROJECT_NAME:-bscp}_postgres_data}
+  asset_storage:
+    name: ${ASSET_STORAGE_VOLUME_NAME:-${COMPOSE_PROJECT_NAME:-bscp}_asset_storage}

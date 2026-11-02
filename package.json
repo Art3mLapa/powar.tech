@@ -1,31 +1,33 @@
 {
-  "name": "powar-tech",
+  "name": "bscp",
   "version": "1.0.0",
   "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
-    "dev": "next dev --hostname 0.0.0.0",
-    "build": "next build",
-    "start": "next start --hostname 0.0.0.0",
-    "typecheck": "tsc --noEmit",
-    "test": "node --experimental-strip-types --test tests/*.test.ts",
-    "check:delivery": "node scripts/check-delivery.mjs",
-    "prepare:frames": "node scripts/prepare-frames.mjs",
-    "lint": "bunx biome lint"
-  },
-  "dependencies": {
-    "fast-xml-parser": "^5.3.0",
-    "motion": "^12.23.24",
-    "next": "^16.0.0",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "dev": "bun run --cwd apps/frontend dev",
+    "dev:backend": "bun run --cwd apps/backend dev",
+    "dev:worker": "bun run --cwd apps/worker dev",
+    "build": "bun run typecheck && bun run --cwd apps/frontend build",
+    "start": "bun run --cwd apps/frontend start",
+    "start:backend": "bun run --cwd apps/backend start",
+    "start:worker": "bun run --cwd apps/worker start",
+    "typecheck": "bun run --cwd apps/frontend typecheck && bun run --cwd apps/backend typecheck && bun run --cwd apps/worker typecheck && bun run --cwd packages/render-contracts typecheck && bun run --cwd packages/render-pipeline typecheck && bun run --cwd packages/game-assets typecheck",
+    "test": "bun run --cwd apps/frontend test && bun run --cwd apps/backend test && bun run --cwd apps/worker test && bun run --cwd packages/render-contracts test && bun run --cwd packages/render-pipeline test && bun run --cwd packages/game-assets test",
+    "check:delivery": "bun run --cwd apps/frontend check:delivery",
+    "check:system": "bun scripts/verify-system.ts",
+    "prepare:frames": "bun run --cwd apps/frontend prepare:frames",
+    "lint": "biome lint apps packages",
+    "db:emit": "bun run --cwd packages/database contract:emit",
+    "db:migrate": "bun run --cwd packages/database db:migrate",
+    "spike:build": "cmake -S apps/renderer -B apps/renderer/build -DCMAKE_BUILD_TYPE=Release && cmake --build apps/renderer/build",
+    "spike:report": "bun run --cwd packages/render-pipeline spike:report -- --run"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.1.17",
-    "@types/node": "^24.10.0",
-    "@types/react": "^19.2.0",
-    "@types/react-dom": "^19.2.0",
-    "sharp": "^0.34.5",
-    "tailwindcss": "^4.1.17",
-    "typescript": "^5.9.3"
+    "@biomejs/biome": "2.6.4",
+    "@types/bun": "1.4.4",
+    "typescript": "5.9.3"
   }
 }

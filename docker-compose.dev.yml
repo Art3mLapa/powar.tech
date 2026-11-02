@@ -1,0 +1,107 @@
+name: bscp-dev
+
+x-dev-database-url: &dev-database-url "postgresql://${POSTGRES_USER:-bscp}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-bscp}"
+x-dev-storage: &dev-storage /app/runtime/storage
+
+services:
+  postgres:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-bscp}
+      POSTGRES_DB: ${POSTGRES_DB:-bscp}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-55439}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dependencies
+    command: ["bun", "run", "--cwd", "packages/database", "db:migrate"]
+    environment:
+      DATABASE_URL: *dev-database-url
+      DO_NOT_TRACK: "1"
+      PRISMA_DISABLE_TELEMETRY: "1"
+    volumes:
+      - ./packages/database:/app/packages/database
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dependencies
+    command: ["bun", "--watch", "apps/backend/src/index.ts"]
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: *dev-database-url
+      STORAGE_DIR: *dev-storage
+      PORT: "3001"
+      WEB_ORIGIN: ${WEB_ORIGIN:-http://localhost:3000}
+      TOTP_ENCRYPTION_KEY: ${TOTP_ENCRYPTION_KEY:?Set 64-character hex TOTP_ENCRYPTION_KEY}
+      DO_NOT_TRACK: "1"
+      PRISMA_DISABLE_TELEMETRY: "1"
+    ports:
+      - "127.0.0.1:${BACKEND_PORT:-3001}:3001"
+    volumes:
+      - ./apps/backend:/app/apps/backend
+      - ./packages/contracts:/app/packages/contracts
+      - ./packages/database:/app/packages/database
+      - asset_storage:/app/runtime/storage
+    healthcheck:
+      test: ["CMD", "bun", "-e", "fetch('http://localhost:3001/ready').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    init: true
+    restart: unless-stopped
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dependencies
+    command: ["bun", "--watch", "apps/worker/src/index.ts"]
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: *dev-database-url
+      STORAGE_DIR: *dev-storage
+      SCHEDULER_ENABLED: "false"
+      DO_NOT_TRACK: "1"
+      PRISMA_DISABLE_TELEMETRY: "1"
+      RENDER_SOURCE_ROOT: ${RENDER_SOURCE_ROOT:-}
+      RENDER_HOOKS: ${RENDER_HOOKS:-}
+      RENDER_PUBLISH: ${RENDER_PUBLISH:-false}
+    volumes:
+      - ./apps/worker:/app/apps/worker
+      - ./packages/contracts:/app/packages/contracts
+      - ./packages/database:/app/packages/database
+      - ./packages/game-assets:/app/packages/game-assets
+      - ./packages/render-contracts:/app/packages/render-contracts
+      - ./packages/render-pipeline:/app/packages/render-pipeline
+      - ./apps/renderer/build:/app/apps/renderer/build
+      - asset_storage:/app/runtime/storage
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    init: true
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  asset_storage:

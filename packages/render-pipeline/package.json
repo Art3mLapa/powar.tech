@@ -1,0 +1,23 @@
+{
+  "name": "@bscp/render-pipeline",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "bun test src/ --pass-with-no-tests",
+    "spike:build": "cmake -S ../../apps/renderer -B ../../apps/renderer/build -DCMAKE_BUILD_TYPE=Release && cmake --build ../../apps/renderer/build",
+    "spike:report": "bun src/spike-report.ts --"
+  },
+  "dependencies": {
+    "@bscp/render-contracts": "workspace:*",
+    "@bscp/game-assets": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.4.3",
+    "sharp": "^0.34.5",
+    "typescript": "^5.9.3"
+  }
+}

@@ -1,0 +1,20 @@
+{
+	"compilerOptions": {
+		"target": "ES2023",
+		"lib": ["ESNext", "DOM"],
+		"module": "Preserve",
+		"moduleResolution": "Bundler",
+		"strict": true,
+		"skipLibCheck": true,
+		"noEmit": true,
+		"types": ["../../node_modules/@types/bun"],
+		"resolveJsonModule": true,
+		"allowImportingTsExtensions": true
+	},
+	"include": [
+		"src/**/*.ts",
+		"../../packages/render-contracts/src/**/*.ts",
+		"../../packages/game-assets/src/mcsa.ts",
+		"../../packages/game-assets/src/binary.ts"
+	]
+}

@@ -1,0 +1,23 @@
+{
+	"name": "@bscp/database",
+	"private": true,
+	"type": "module",
+	"exports": { ".": "./src/prisma/db.ts" },
+	"scripts": {
+		"contract:emit": "prisma contract emit",
+		"db:init": "prisma db init",
+		"db:migrate": "prisma db migrate",
+		"db:verify": "prisma db verify"
+	},
+	"dependencies": {
+		"@prisma/orm-postgres": "8.0.0-rc.21",
+		"temporal-polyfill": "^1.0.4",
+		"dotenv": "^17.4.2"
+	},
+	"devDependencies": {
+		"prisma": "8.0.0-rc.28",
+		"@prisma/cli-engine": "0.9.0",
+		"@types/node": "^24.10.0",
+		"typescript": "^5.9.3"
+	}
+}
