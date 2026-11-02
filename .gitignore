@@ -8,5 +8,8 @@ out/
 .test-results/
 next-env.d.ts
 *.log
-AGENTS.md
-README.md
+.research/
+.runtime/
+/README.md
+
+apps/renderer/build/

@@ -1,0 +1,185 @@
+// use prisma-8
+
+model User {
+  id Int @id @default(autoincrement())
+  username String @unique
+  role String @default("AUTHOR")
+  passwordHash String @default("")
+  totpSecret String?
+  totpEnabled Boolean @default(false)
+  lastTotpStep BigInt @default(-1)
+  disabled Boolean @default(false)
+  posts Post[]
+  sessions Session[]
+  recoveryCodes RecoveryCode[]
+  challenges AuthChallenge[]
+  createdAt TimestamptzString @default(now())
+  updatedAt temporal.UpdatedAtString
+}
+
+model Invitation {
+  id String @id
+  tokenHash String @unique
+  username String @unique
+  role String
+  ownerSlot Int? @unique
+  expiresAt TimestamptzString
+  usedAt TimestamptzString?
+  createdAt TimestamptzString @default(now())
+}
+
+model Session {
+  id String @id
+  userId Int
+  user User @relation(fields: [userId], references: [id])
+  expiresAt TimestamptzString
+  createdAt TimestamptzString @default(now())
+  @@index([expiresAt])
+}
+
+model AuthChallenge {
+  id String @id
+  userId Int
+  user User @relation(fields: [userId], references: [id])
+  kind String
+  expiresAt TimestamptzString
+  createdAt TimestamptzString @default(now())
+}
+
+model RecoveryCode {
+  id String @id
+  userId Int
+  user User @relation(fields: [userId], references: [id])
+}
+
+model RateLimit {
+  id String @id
+  attempts Int @default(0)
+  expiresAt TimestamptzString
+}
+
+model AuditEvent {
+  id String @id
+  actorId Int?
+  action String
+  subject String
+  createdAt TimestamptzString @default(now())
+  @@index([createdAt])
+}
+
+model Post {
+  id Int @id @default(autoincrement())
+  title String
+  content String?
+  slug String? @unique
+  excerpt String @default("")
+  coverId String?
+  tags String[] @default([])
+  status String @default("DRAFT")
+  version Int @default(1)
+  reviewNote String?
+  publishedAt TimestamptzString?
+  author User @relation(fields: [authorId], references: [id])
+  authorId Int
+  revisions PostRevision[]
+  createdAt TimestamptzString @default(now())
+  updatedAt temporal.UpdatedAtString
+  @@index([status, publishedAt])
+}
+
+model PostRevision {
+  id String @id
+  postId Int
+  post Post @relation(fields: [postId], references: [id])
+  version Int
+  title String
+  content String
+  createdAt TimestamptzString @default(now())
+  @@unique([postId, version])
+}
+
+model StoredAsset {
+  id String @id
+  storageKey String @unique
+  mime String
+  size BigInt
+  originalName String
+  postId Int?
+  snapshotId String?
+  public Boolean @default(false)
+  createdAt TimestamptzString @default(now())
+}
+
+model GameSnapshot {
+  id String @id
+  region String
+  manifestHash String
+  previousId String?
+  files GameFile[]
+  changes GameChange[]
+  createdAt TimestamptzString @default(now())
+  @@unique([region, manifestHash])
+  @@index([region, createdAt])
+}
+
+model GameFile {
+  id String @id
+  snapshotId String
+  snapshot GameSnapshot @relation(fields: [snapshotId], references: [id])
+  path String
+  hash String
+  size BigInt
+  url String
+  category String
+  @@unique([snapshotId, path])
+  @@index([hash])
+}
+
+model GameChange {
+  id String @id
+  snapshotId String
+  snapshot GameSnapshot @relation(fields: [snapshotId], references: [id])
+  path String
+  kind String
+  category String
+  oldValue String?
+  newValue String?
+  @@index([snapshotId, category])
+}
+
+model Job {
+  id String @id
+  kind String
+  dedupeKey String @unique
+  payload String
+  state String @default("QUEUED")
+  attempts Int @default(0)
+  progress Int @default(0)
+  error String?
+  result String?
+  leaseUntil TimestamptzString?
+  leaseOwner String?
+  availableAt TimestamptzString @default(now())
+  createdAt TimestamptzString @default(now())
+  updatedAt temporal.UpdatedAtString
+  @@index([state, availableAt])
+}
+
+model DataSnapshot {
+  id String @id
+  kind String
+  region String
+  sourceHash String
+  data String
+  previousId String?
+  createdAt TimestamptzString @default(now())
+  @@unique([kind, region, sourceHash])
+}
+
+model ServerSample {
+  id String @id
+  region String
+  data String
+  createdAt TimestamptzString @default(now())
+  @@index([region, createdAt])
+}

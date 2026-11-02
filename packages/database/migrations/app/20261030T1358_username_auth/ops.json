@@ -1,0 +1,626 @@
+[
+	{
+		"id": "dropConstraint.Invitation.Invitation_email_key",
+		"label": "Drop constraint \"Invitation_email_key\" on \"Invitation\"",
+		"operationClass": "widening",
+		"target": {
+			"id": "postgres",
+			"details": {
+				"schema": "public",
+				"objectType": "unique",
+				"name": "Invitation_email_key",
+				"table": "Invitation"
+			}
+		},
+		"precheck": [
+			{
+				"description": "ensure constraint \"Invitation_email_key\" exists",
+				"sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+				"params": [
+					"Invitation_email_key",
+					"public",
+					"\"public\".\"Invitation\""
+				],
+				"expectation": {
+					"expects": "present",
+					"object": "constraint \"Invitation_email_key\" on \"Invitation\""
+				}
+			}
+		],
+		"execute": [
+			{
+				"description": "drop constraint \"Invitation_email_key\"",
+				"sql": "ALTER TABLE \"public\".\"Invitation\" DROP CONSTRAINT \"Invitation_email_key\""
+			}
+		],
+		"postcheck": [
+			{
+				"description": "verify constraint \"Invitation_email_key\" does not exist",
+				"sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+				"params": [
+					"Invitation_email_key",
+					"public",
+					"\"public\".\"Invitation\""
+				],
+				"expectation": {
+					"expects": "absent",
+					"object": "constraint \"Invitation_email_key\" on \"Invitation\""
+				}
+			}
+		]
+	},
+	{
+		"id": "dropConstraint.User.User_email_key",
+		"label": "Drop constraint \"User_email_key\" on \"User\"",
+		"operationClass": "widening",
+		"target": {
+			"id": "postgres",
+			"details": {
+				"schema": "public",
+				"objectType": "unique",
+				"name": "User_email_key",
+				"table": "User"
+			}
+		},
+		"precheck": [
+			{
+				"description": "ensure constraint \"User_email_key\" exists",
+				"sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+				"params": ["User_email_key", "public", "\"public\".\"User\""],
+				"expectation": {
+					"expects": "present",
+					"object": "constraint \"User_email_key\" on \"User\""
+				}
+			}
+		],
+		"execute": [
+			{
+				"description": "drop constraint \"User_email_key\"",
+				"sql": "ALTER TABLE \"public\".\"User\" DROP CONSTRAINT \"User_email_key\""
+			}
+		],
+		"postcheck": [
+			{
+				"description": "verify constraint \"User_email_key\" does not exist",
+				"sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+				"params": ["User_email_key", "public", "\"public\".\"User\""],
+				"expectation": {
+					"expects": "absent",
+					"object": "constraint \"User_email_key\" on \"User\""
+				}
+			}
+		]
+	},
+	{
+		"id": "dropConstraint.User.User_username_key",
+		"label": "Drop constraint \"User_username_key\" on \"User\"",
+		"operationClass": "widening",
+		"target": {
+			"id": "postgres",
+			"details": {
+				"schema": "public",
+				"objectType": "unique",
+				"name": "User_username_key",
+				"table": "User"
+			}
+		},
+		"precheck": [
+			{
+				"description": "ensure constraint \"User_username_key\" exists",
+				"sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+				"params": [
+					"User_username_key",
+					"public",
+					"\"public\".\"User\""
+				],
+				"expectation": {
+					"expects": "present",
+					"object": "constraint \"User_username_key\" on \"User\""
+				}
+			}
+		],
+		"execute": [
+			{
+				"description": "drop constraint \"User_username_key\"",
+				"sql": "ALTER TABLE \"public\".\"User\" DROP CONSTRAINT \"User_username_key\""
+			}
+		],
+		"postcheck": [
+			{
+				"description": "verify constraint \"User_username_key\" does not exist",
+				"sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+				"params": [
+					"User_username_key",
+					"public",
+					"\"public\".\"User\""
+				],
+				"expectation": {
+					"expects": "absent",
+					"object": "constraint \"User_username_key\" on \"User\""
+				}
+			}
+		]
+	},
+	{
+		"id": "column.public.Invitation.username",
+		"label": "Add column \"username\" to \"Invitation\"",
+		"operationClass": "additive",
+		"target": {
+			"id": "postgres",
+			"details": {
+				"schema": "public",
+				"objectType": "column",
+				"name": "username",
+				"table": "Invitation"
+			}
+		},
+		"precheck": [
+			{
+				"description": "ensure column \"username\" is missing",
+				"sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+				"params": ["public", "Invitation", "username"],
+				"expectation": {
+					"expects": "absent",
+					"object": "column \"username\" on \"Invitation\""
+				}
+			}
+		],
+		"execute": [
+			{
+				"description": "add column \"username\"",
+				"sql": "ALTER TABLE \"public\".\"Invitation\" ADD COLUMN \"username\" text"
+			}
+		],
+		"postcheck": [
+			{
+				"description": "verify column \"username\" exists",
+				"sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+				"params": ["public", "Invitation", "username"],
+				"expectation": {
+					"expects": "present",
+					"object": "column \"username\" on \"Invitation\""
+				}
+			},
+			{
+				"description": "verify column \"username\" has type \"text\"",
+				"sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_attribute\" AS \"a\" INNER JOIN \"pg_class\" AS \"c\" ON \"c\".\"oid\" = \"a\".\"attrelid\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"relnamespace\" WHERE (\"n\".\"nspname\" = $1 AND \"c\".\"relname\" = $2 AND \"a\".\"attname\" = $3 AND (format_type(\"a\".\"atttypid\", \"a\".\"atttypmod\")) = $4 AND NOT (\"a\".\"attisdropped\"))) AS \"result\"",
+				"params": ["public", "Invitation", "username", "text"]
+			}
+		]
+	},
+	{
+		"id": "data_migration.normalize-User-username",
+		"label": "Data transform: normalize-User-username",
+		"operationClass": "data",
+		"target": {
+			"id": "postgres",
+			"details": {
+				"schema": "public",
+				"objectType": "column",
+				"name": "username",
+				"table": "User"
+			}
+		},
+		"precheck": [
+			{
+				"description": "Check normalize-User-username has work to do",
+				"sql": "SELECT EXISTS (SELECT \"id\" FROM \"public\".\"User\" WHERE \"username\" IS NULL OR btrim(\"username\") !~ '^[A-Za-z0-9][A-Za-z0-9_-]{2,31}$' OR \"username\" <> lower(btrim(\"username\")) LIMIT 1) AS ok",
+				"params": []
+			}
+		],
+		"execute": [
+			{
+				"description": "Run normalize-User-username",
+				"sql": "DO $$\nDECLARE\n  row_data RECORD;\n  candidate TEXT;\n  base TEXT;\n  suffix INTEGER;\nBEGIN\n  CREATE TEMP TABLE bscp_user_username_source ON COMMIT DROP AS\n    SELECT \"id\", \"username\", \"email\" FROM \"public\".\"User\";\n  UPDATE \"public\".\"User\" SET \"username\" = NULL;\n  FOR row_data IN SELECT * FROM bscp_user_username_source ORDER BY \"id\" LOOP\n    candidate := lower(btrim(row_data.\"username\"));\n    IF candidate IS NULL OR candidate !~ '^[a-z0-9][a-z0-9_-]{2,31}$' OR EXISTS (\n      SELECT 1 FROM \"public\".\"User\" WHERE \"username\" = candidate\n    ) THEN\n      base := 'user_' || row_data.\"id\"::TEXT;\n      candidate := base;\n      suffix := 2;\n      WHILE EXISTS (SELECT 1 FROM \"public\".\"User\" WHERE \"username\" = candidate) LOOP\n        candidate := left(base, 32 - length('_' || suffix::TEXT)) || '_' || suffix::TEXT;\n        suffix := suffix + 1;\n      END LOOP;\n    END IF;\n    UPDATE \"public\".\"User\" SET \"username\" = candidate WHERE \"id\" = row_data.\"id\";\n  END LOOP;\nEND $$",
+				"params": []
+			}
+		],
+		"postcheck": [
+			{
+				"description": "Verify normalize-User-username resolved all violations",
+				"sql": "SELECT NOT EXISTS (SELECT \"id\" FROM \"public\".\"User\" WHERE \"username\" IS NULL OR btrim(\"username\") !~ '^[A-Za-z0-9][A-Za-z0-9_-]{2,31}$' OR \"username\" <> lower(btrim(\"username\")) LIMIT 1) AS ok",
+				"params": [],
+				"meta": {
+					"requiredColumn": {
+						"table": "User",
+						"column": "username",
+						"reason": "backfillMissedRows"
+					}
+				}
+			}
+		]
+	},
+	{
+		"id": "alterNullability.setNotNull.User.username",
+		"label": "Set NOT NULL on \"User\".\"username\"",
+		"operationClass": "widening",
+		"target": {
+			"id": "postgres",
+			"details": {
+				"schema": "public",
+				"objectType": "column",
+				"name": "username",
+				"table": "User"
+			}
+		},
+		"precheck": [
+			{
+				"description": "ensure column \"username\" exists",
+				"sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+				"params": ["public", "User", "username"],
+				"expectation": {
+					"expects": "present",
+					"object": "column \"username\" on \"User\""
+				}
+			},
+			{
+				"description": "ensure no NULL values in \"username\"",
+				"sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"public\".\"User\" WHERE \"username\" IS NULL) AS \"result\"",
+				"params": [],
+				"meta": {
+					"requiredColumn": {
+						"table": "User",
+						"column": "username",
+						"reason": "nullValues"
+					}
+				}
+			}
+		],
+		"execute": [
+			{
+				"description": "set NOT NULL on \"username\"",
+				"sql": "ALTER TABLE \"public\".\"User\" ALTER COLUMN \"username\" SET NOT NULL"
+			}
+		],
+		"postcheck": [
+			{
+				"description": "verify column \"username\" is NOT NULL",
+				"sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3 AND \"is_nullable\" = $4)) AS \"result\"",
+				"params": ["public", "User", "username", "NO"]
+			}
+		]
+	},
+	{
+		"id": "data_migration.backfill-Invitation-username",
+		"label": "Data transform: backfill-Invitation-username",
+		"operationClass": "data",
+		"target": {
+			"id": "postgres",
+			"details": {
+				"schema": "public",
+				"objectType": "column",
+				"name": "username",
+				"table": "Invitation"
+			}
+		},
+		"precheck": [
+			{
+				"description": "Check backfill-Invitation-username has work to do",
+				"sql": "SELECT EXISTS (SELECT \"id\" FROM \"public\".\"Invitation\" WHERE \"username\" IS NULL LIMIT 1) AS ok",
+				"params": []
+			}
+		],
+		"execute": [
+			{
+				"description": "Run backfill-Invitation-username",
+				"sql": "DO $$\nDECLARE\n  row_data RECORD;\n  candidate TEXT;\n  base TEXT;\n  suffix INTEGER;\nBEGIN\n  UPDATE \"public\".\"Invitation\" invitation\n  SET \"username\" = user_row.\"username\"\n  FROM \"public\".\"User\" user_row\n  WHERE invitation.\"usedAt\" IS NOT NULL\n    AND invitation.\"email\" = user_row.\"email\";\n  FOR row_data IN\n    SELECT \"id\" FROM \"public\".\"Invitation\" WHERE \"username\" IS NULL ORDER BY \"id\"\n  LOOP\n    base := 'invite_' || left(replace(row_data.\"id\", '-', ''), 25);\n    candidate := base;\n    suffix := 2;\n    WHILE EXISTS (SELECT 1 FROM \"public\".\"Invitation\" WHERE \"username\" = candidate) LOOP\n      candidate := left(base, 32 - length('_' || suffix::TEXT)) || '_' || suffix::TEXT;\n      suffix := suffix + 1;\n    END LOOP;\n    UPDATE \"public\".\"Invitation\" SET \"username\" = candidate WHERE \"id\" = row_data.\"id\";\n  END LOOP;\nEND $$",
+				"params": []
+			}
+		],
+		"postcheck": [
+			{
+				"description": "Verify backfill-Invitation-username resolved all violations",
+				"sql": "SELECT NOT EXISTS (SELECT \"id\" FROM \"public\".\"Invitation\" WHERE \"username\" IS NULL LIMIT 1) AS ok",
+				"params": [],
+				"meta": {
+					"requiredColumn": {
+						"table": "Invitation",
+						"column": "username",
+						"reason": "backfillMissedRows"
+					}
+				}
+			}
+		]
+	},
+	{
+		"id": "data_migration.rewrite-AuditEvent-subjects",
+		"label": "Data transform: rewrite-AuditEvent-subjects",
+		"operationClass": "data",
+		"target": {
+			"id": "postgres"
+		},
+		"precheck": [
+			{
+				"description": "Check rewrite-AuditEvent-subjects has work to do",
+				"sql": "SELECT EXISTS (SELECT audit.\"id\"\nFROM \"public\".\"AuditEvent\" audit\nWHERE EXISTS (\n  SELECT 1 FROM (\n    SELECT \"email\" AS subject, \"username\" FROM \"public\".\"User\"\n    UNION ALL\n    SELECT \"email\" AS subject, \"username\" FROM \"public\".\"Invitation\"\n  ) candidates\n  WHERE candidates.subject = audit.\"subject\"\n  GROUP BY candidates.subject\n  HAVING count(DISTINCT candidates.\"username\") = 1\n) LIMIT 1) AS ok",
+				"params": []
+			}
+		],
+		"execute": [
+			{
+				"description": "Run rewrite-AuditEvent-subjects",
+				"sql": "WITH candidates AS (\n  SELECT \"email\" AS subject, \"username\" FROM \"public\".\"User\"\n  UNION ALL\n  SELECT \"email\" AS subject, \"username\" FROM \"public\".\"Invitation\"\n), unique_candidates AS (\n  SELECT subject, min(\"username\") AS username\n  FROM candidates\n  GROUP BY subject\n  HAVING count(DISTINCT \"username\") = 1\n)\nUPDATE \"public\".\"AuditEvent\" audit\nSET \"subject\" = unique_candidates.username\nFROM unique_candidates\nWHERE audit.\"subject\" = unique_candidates.subject",
+				"params": []
+			}
+		],
+		"postcheck": [
+			{
+				"description": "Verify rewrite-AuditEvent-subjects resolved all violations",
+				"sql": "SELECT NOT EXISTS (SELECT audit.\"id\"\nFROM \"public\".\"AuditEvent\" audit\nWHERE EXISTS (\n  SELECT 1 FROM (\n    SELECT \"email\" AS subject, \"username\" FROM \"public\".\"User\"\n    UNION ALL\n    SELECT \"email\" AS subject, \"username\" FROM \"public\".\"Invitation\"\n  ) candidates\n  WHERE candidates.subject = audit.\"subject\"\n  GROUP BY candidates.subject\n  HAVING count(DISTINCT candidates.\"username\") = 1\n) LIMIT 1) AS ok",
+				"params": []
+			}
+		]
+	},
+	{
+		"id": "alterNullability.setNotNull.Invitation.username",
+		"label": "Set NOT NULL on \"Invitation\".\"username\"",
+		"operationClass": "widening",
+		"target": {
+			"id": "postgres",
+			"details": {
+				"schema": "public",
+				"objectType": "column",
+				"name": "username",
+				"table": "Invitation"
+			}
+		},
+		"precheck": [
+			{
+				"description": "ensure column \"username\" exists",
+				"sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+				"params": ["public", "Invitation", "username"],
+				"expectation": {
+					"expects": "present",
+					"object": "column \"username\" on \"Invitation\""
+				}
+			},
+			{
+				"description": "ensure no NULL values in \"username\"",
+				"sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"public\".\"Invitation\" WHERE \"username\" IS NULL) AS \"result\"",
+				"params": [],
+				"meta": {
+					"requiredColumn": {
+						"table": "Invitation",
+						"column": "username",
+						"reason": "nullValues"
+					}
+				}
+			}
+		],
+		"execute": [
+			{
+				"description": "set NOT NULL on \"username\"",
+				"sql": "ALTER TABLE \"public\".\"Invitation\" ALTER COLUMN \"username\" SET NOT NULL"
+			}
+		],
+		"postcheck": [
+			{
+				"description": "verify column \"username\" is NOT NULL",
+				"sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3 AND \"is_nullable\" = $4)) AS \"result\"",
+				"params": ["public", "Invitation", "username", "NO"]
+			}
+		]
+	},
+	{
+		"id": "dropColumn.Invitation.email",
+		"label": "Drop column \"email\" from \"Invitation\"",
+		"operationClass": "destructive",
+		"target": {
+			"id": "postgres",
+			"details": {
+				"schema": "public",
+				"objectType": "column",
+				"name": "email",
+				"table": "Invitation"
+			}
+		},
+		"precheck": [
+			{
+				"description": "ensure column \"email\" exists",
+				"sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+				"params": ["public", "Invitation", "email"],
+				"expectation": {
+					"expects": "present",
+					"object": "column \"email\" on \"Invitation\""
+				}
+			}
+		],
+		"execute": [
+			{
+				"description": "drop column \"email\"",
+				"sql": "ALTER TABLE \"public\".\"Invitation\" DROP COLUMN \"email\""
+			}
+		],
+		"postcheck": [
+			{
+				"description": "verify column \"email\" does not exist",
+				"sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+				"params": ["public", "Invitation", "email"],
+				"expectation": {
+					"expects": "absent",
+					"object": "column \"email\" on \"Invitation\""
+				}
+			}
+		]
+	},
+	{
+		"id": "dropColumn.User.name",
+		"label": "Drop column \"name\" from \"User\"",
+		"operationClass": "destructive",
+		"target": {
+			"id": "postgres",
+			"details": {
+				"schema": "public",
+				"objectType": "column",
+				"name": "name",
+				"table": "User"
+			}
+		},
+		"precheck": [
+			{
+				"description": "ensure column \"name\" exists",
+				"sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+				"params": ["public", "User", "name"],
+				"expectation": {
+					"expects": "present",
+					"object": "column \"name\" on \"User\""
+				}
+			}
+		],
+		"execute": [
+			{
+				"description": "drop column \"name\"",
+				"sql": "ALTER TABLE \"public\".\"User\" DROP COLUMN \"name\""
+			}
+		],
+		"postcheck": [
+			{
+				"description": "verify column \"name\" does not exist",
+				"sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+				"params": ["public", "User", "name"],
+				"expectation": {
+					"expects": "absent",
+					"object": "column \"name\" on \"User\""
+				}
+			}
+		]
+	},
+	{
+		"id": "dropColumn.User.email",
+		"label": "Drop column \"email\" from \"User\"",
+		"operationClass": "destructive",
+		"target": {
+			"id": "postgres",
+			"details": {
+				"schema": "public",
+				"objectType": "column",
+				"name": "email",
+				"table": "User"
+			}
+		},
+		"precheck": [
+			{
+				"description": "ensure column \"email\" exists",
+				"sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+				"params": ["public", "User", "email"],
+				"expectation": {
+					"expects": "present",
+					"object": "column \"email\" on \"User\""
+				}
+			}
+		],
+		"execute": [
+			{
+				"description": "drop column \"email\"",
+				"sql": "ALTER TABLE \"public\".\"User\" DROP COLUMN \"email\""
+			}
+		],
+		"postcheck": [
+			{
+				"description": "verify column \"email\" does not exist",
+				"sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+				"params": ["public", "User", "email"],
+				"expectation": {
+					"expects": "absent",
+					"object": "column \"email\" on \"User\""
+				}
+			}
+		]
+	},
+	{
+		"id": "unique.User.User_username_key",
+		"label": "Add unique constraint on \"User\" (username)",
+		"operationClass": "additive",
+		"target": {
+			"id": "postgres",
+			"details": {
+				"schema": "public",
+				"objectType": "unique",
+				"name": "User_username_key",
+				"table": "User"
+			}
+		},
+		"precheck": [
+			{
+				"description": "ensure constraint \"User_username_key\" does not exist",
+				"sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+				"params": [
+					"User_username_key",
+					"public",
+					"\"public\".\"User\""
+				],
+				"expectation": {
+					"expects": "absent",
+					"object": "constraint \"User_username_key\" on \"User\""
+				}
+			}
+		],
+		"execute": [
+			{
+				"description": "add unique constraint \"User_username_key\"",
+				"sql": "ALTER TABLE \"public\".\"User\" ADD CONSTRAINT \"User_username_key\" UNIQUE (\"username\")"
+			}
+		],
+		"postcheck": [
+			{
+				"description": "verify unique constraint \"User_username_key\" exists on (username)",
+				"sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb)) AS \"result\"",
+				"params": [
+					"User_username_key",
+					"public",
+					"\"public\".\"User\"",
+					"u",
+					"[\"username\"]"
+				]
+			}
+		]
+	},
+	{
+		"id": "unique.Invitation.Invitation_username_key",
+		"label": "Add unique constraint on \"Invitation\" (username)",
+		"operationClass": "additive",
+		"target": {
+			"id": "postgres",
+			"details": {
+				"schema": "public",
+				"objectType": "unique",
+				"name": "Invitation_username_key",
+				"table": "Invitation"
+			}
+		},
+		"precheck": [
+			{
+				"description": "ensure constraint \"Invitation_username_key\" does not exist",
+				"sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+				"params": [
+					"Invitation_username_key",
+					"public",
+					"\"public\".\"Invitation\""
+				],
+				"expectation": {
+					"expects": "absent",
+					"object": "constraint \"Invitation_username_key\" on \"Invitation\""
+				}
+			}
+		],
+		"execute": [
+			{
+				"description": "add unique constraint \"Invitation_username_key\"",
+				"sql": "ALTER TABLE \"public\".\"Invitation\" ADD CONSTRAINT \"Invitation_username_key\" UNIQUE (\"username\")"
+			}
+		],
+		"postcheck": [
+			{
+				"description": "verify unique constraint \"Invitation_username_key\" exists on (username)",
+				"sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb)) AS \"result\"",
+				"params": [
+					"Invitation_username_key",
+					"public",
+					"\"public\".\"Invitation\"",
+					"u",
+					"[\"username\"]"
+				]
+			}
+		]
+	}
+]

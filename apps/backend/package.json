@@ -1,0 +1,23 @@
+{
+	"name": "@bscp/backend",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"dev": "bun --watch src/index.ts",
+		"start": "bun src/index.ts",
+		"test": "bun test --isolate",
+		"typecheck": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@bscp/contracts": "workspace:*",
+		"@bscp/database": "workspace:*",
+		"axios": "1.21.0",
+		"elysia": "2.0.0-rc.0",
+		"sharp": "^0.35.5",
+		"zod": "4.6.7"
+	},
+	"devDependencies": {
+		"@types/bun": "^1.4.3",
+		"typescript": "^5.9.3"
+	}
+}

@@ -1,0 +1,26 @@
+{
+	"name": "@bscp/game-assets",
+	"private": true,
+	"type": "module",
+	"exports": {
+		".": "./src/index.ts",
+		"./mcsa": "./src/mcsa.ts",
+		"./textures": "./src/textures.ts",
+		"./binary": "./src/binary.ts"
+	},
+	"dependencies": {
+		"axios": "1.21.0",
+		"sharp": "^0.34.5",
+		"three": "0.187.0",
+		"playwright-core": "1.64.1"
+	},
+	"devDependencies": {
+		"@types/bun": "^1.4.3",
+		"typescript": "^5.9.3",
+		"@types/three": "^0.185.4"
+	},
+	"scripts": {
+		"typecheck": "tsc --noEmit",
+		"test": "bun test --pass-with-no-tests"
+	}
+}

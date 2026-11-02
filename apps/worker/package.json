@@ -1,0 +1,19 @@
+{
+	"name": "@bscp/worker",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"dev": "bun --watch src/index.ts",
+		"start": "bun src/index.ts",
+		"typecheck": "tsc --noEmit",
+		"test": "bun test"
+	},
+	"dependencies": {
+		"@bscp/database": "workspace:*",
+		"@bscp/game-assets": "workspace:*",
+		"@bscp/contracts": "workspace:*",
+		"@bscp/render-pipeline": "workspace:*",
+		"zod": "4.6.7"
+	},
+	"devDependencies": { "@types/bun": "^1.4.3", "typescript": "^5.9.3" }
+}

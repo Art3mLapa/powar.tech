@@ -1,0 +1,107 @@
+import assert from 'node:assert/strict'
+import { createRequire } from 'node:module'
+import { mkdir } from 'node:fs/promises'
+
+const origin = new URL(process.env.SYSTEM_TEST_ORIGIN ?? 'http://localhost:3100')
+if (!['localhost', '127.0.0.1'].includes(origin.hostname) || !process.env.TEST_DATABASE_URL || !process.env.TOTP_ENCRYPTION_KEY) {
+  throw new Error('System verification requires a local frontend, TEST_DATABASE_URL and a test TOTP_ENCRYPTION_KEY')
+}
+process.env.DATABASE_URL = process.env.TEST_DATABASE_URL
+process.env.WEB_ORIGIN = origin.origin
+process.env.NODE_ENV = 'test'
+const { chromium } = createRequire(new URL('../packages/game-assets/package.json', import.meta.url))('playwright-core') as typeof import('../packages/game-assets/node_modules/playwright-core')
+const { invite } = await import('../apps/backend/src/app/api/auth/auth.service')
+const { totp } = await import('../apps/backend/src/lib/crypto')
+const { db } = await import('../packages/database/src/prisma/db')
+const username = `browser_${crypto.randomUUID().replaceAll('-', '').slice(0, 20)}`
+const invitation = await invite(username, 'ADMIN', null)
+const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH ?? '/usr/bin/chromium', headless: true })
+await mkdir('.runtime/verification', { recursive: true })
+try {
+  const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } })
+  page.setDefaultTimeout(20_000)
+  await page.goto(invitation.url)
+  const password = `test-password-${crypto.randomUUID()}`
+  await page.getByLabel('Username', { exact: true }).fill(username.toUpperCase())
+  await page.getByLabel('Пароль', { exact: true }).fill(password)
+  await page.getByRole('button', { name: 'Создать аккаунт', exact: true }).click()
+  await page.locator('.secret-key').waitFor()
+  const secret = (await page.locator('.secret-key').textContent())!.trim()
+  assert.match(secret, /^[A-Z2-7]+$/)
+  assert.equal((await page.context().cookies()).some(cookie => cookie.name === 'bscp_session'), false)
+  await page.getByLabel(/^Код из приложения/).fill(totp(secret, Math.floor(Date.now() / 30_000)))
+  await page.getByRole('button', { name: 'Подтвердить код', exact: true }).click()
+  await page.locator('.recovery-codes').waitFor()
+  const recoveryCode = (await page.locator('.recovery-codes').textContent())?.trim().split('\n')[0]
+  assert.ok(recoveryCode, 'Enrollment must provide recovery codes')
+  await page.getByRole('link', { name: 'Открыть редакцию', exact: true }).click()
+  await page.getByRole('button', { name: 'Создать статью', exact: true }).click()
+  await page.waitForURL('**/workspace/articles/*')
+  const slug = `system-${crypto.randomUUID()}`
+  await page.getByLabel('Название', { exact: true }).fill('Сквозная проверка статьи')
+  await page.getByLabel(/^Адрес статьи/).fill(slug)
+  await page.getByLabel('Краткое описание', { exact: true }).fill('Проверка монорепозитория, редактора и публикации.')
+  await page.getByLabel('Текст Markdown', { exact: true }).fill('## Проверка содержимого\n\n**Текст статьи**\n\n<script>window.__unsafeArticle = true</script>\n\n:::note\nБезопасный блок\n:::\n')
+  const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAABAAAAAJCAIAAAC0SDtlAAAACXBIWXMAAAPoAAAD6AG1e1JrAAAAFUlEQVQYlWNgWPeeNMQwquH9IAglAJ/a6FFEGA/pAAAAAElFTkSuQmCC', 'base64')
+  await page.locator('input[type="file"]').setInputFiles({ name: 'verification.png', mimeType: 'image/png', buffer: png })
+  await page.getByRole('button', { name: 'Сделать обложкой', exact: true }).click()
+  await page.getByRole('button', { name: 'Сохранить', exact: true }).click()
+  await page.getByRole('button', { name: 'На проверку', exact: true }).click()
+  await page.getByRole('button', { name: 'На проверку', exact: true }).waitFor({ state: 'hidden' })
+  await page.getByRole('button', { name: 'Опубликовать', exact: true }).click()
+  await page.getByRole('button', { name: 'Снять с публикации', exact: true }).waitFor()
+  await page.goto(new URL(`/articles/${slug}`, origin).href)
+  await page.getByRole('heading', { name: 'Сквозная проверка статьи', exact: true }).waitFor()
+  assert.equal(await page.evaluate(() => '__unsafeArticle' in window), false)
+  const cover = page.getByRole('img', { name: 'Обложка статьи', exact: true })
+  await cover.waitFor()
+  await cover.evaluate(async element => { const image = element as HTMLImageElement; await image.decode(); if (!image.naturalWidth) throw new Error('Cover failed to load') })
+  await page.screenshot({ path: '.runtime/verification/article-desktop.png', fullPage: true })
+  const snapshots = await (await page.request.get(new URL('/api/v1/patches?region=RU', origin).href)).json() as { id: string }[]
+  assert.ok(snapshots.length > 0, 'Import real game assets before running system verification')
+  await page.goto(new URL(`/patches/${snapshots[0].id}`, origin).href)
+  await page.getByRole('button', { name: 'Все файлы и модели', exact: true }).click()
+  await page.getByRole('button', { name: /6p62\.mcsb/ }).first().click()
+  await page.locator('.asset-previews img').first().waitFor()
+  const count = await page.locator('.asset-previews img').count()
+  assert.ok(count >= 4, 'Expected four rendered game model views')
+  for (const image of await page.locator('.asset-previews img').all()) {
+    await image.evaluate(async element => { const image = element as HTMLImageElement; if (!image.complete) await new Promise<void>((resolve, reject) => { image.onload = () => resolve(); image.onerror = () => reject(new Error('Missing render')) }); if (!image.naturalWidth) throw new Error('Empty render') })
+  }
+  await page.locator('.asset-previews').screenshot({ path: '.runtime/verification/game-model-previews.png' })
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.goto(new URL(`/articles/${slug}`, origin).href)
+  await page.getByRole('heading', { name: 'Сквозная проверка статьи', exact: true }).waitFor()
+  assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), true)
+  await page.screenshot({ path: '.runtime/verification/article-mobile.png', fullPage: true })
+  await page.setViewportSize({ width: 1440, height: 1000 })
+  await page.goto(new URL('/admin/jobs', origin).href)
+  await page.getByRole('heading', { name: 'Обработка обновлений', exact: true }).waitFor()
+  await page.getByText('Результат', { exact: true }).first().click()
+  assert.ok((await page.locator('.diff-value').first().textContent())?.includes('outputs'))
+  await page.goto(new URL('/admin', origin).href)
+  const inviteUsername = `invited_${crypto.randomUUID().replaceAll('-', '').slice(0, 20)}`
+  await page.getByLabel('Username', { exact: true }).fill(inviteUsername)
+  await page.getByRole('button', { name: 'Создать приглашение', exact: true }).click()
+  await page.getByLabel('Ссылка-приглашение', { exact: true }).waitFor()
+  page.once('dialog', dialog => dialog.accept())
+  await page.getByRole('button', { name: `Отозвать приглашение ${inviteUsername}`, exact: true }).click()
+  await page.getByRole('button', { name: `Отозвать приглашение ${inviteUsername}`, exact: true }).waitFor({ state: 'hidden' })
+  const revoked = await page.request.post(new URL('/api/v1/auth/logout-all', origin).href, { data: {}, headers: { origin: origin.origin } })
+  assert.equal(revoked.status(), 200)
+  await page.goto(new URL('/auth', origin).href)
+  await page.getByLabel('Username', { exact: true }).fill(username.toUpperCase())
+  await page.getByLabel('Пароль', { exact: true }).fill(password)
+  await page.getByRole('button', { name: 'Продолжить', exact: true }).click()
+  await page.getByLabel(/^Код из приложения/).fill(recoveryCode)
+  await page.getByRole('button', { name: 'Подтвердить код', exact: true }).click()
+  await page.getByRole('link', { name: 'Открыть редакцию', exact: true }).click()
+  await page.getByRole('button', { name: 'Создать статью', exact: true }).waitFor()
+  const me = await (await page.request.get(new URL('/api/v1/auth/me', origin).href)).json()
+  assert.equal(me.username, username)
+  assert.equal('email' in me || 'name' in me, false)
+  console.info('BSCP system OK: username invitation/register/login (case normalized), mandatory TOTP and recovery, article image/cover publication, real game previews, mobile layout, safe Markdown, job results and invitation revocation.')
+} finally {
+  await browser.close()
+  await db.close()
+}
