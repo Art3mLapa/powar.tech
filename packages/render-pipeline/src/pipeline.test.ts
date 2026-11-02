@@ -27,25 +27,25 @@ const writeFixture = async (relative: string, body: string) => {
 const roots = (): SourceRoot[] => [
 	{
 		kind: 'configs',
-		label: 'configs_extracted_xeon',
-		root: join(root, 'configs_extracted_xeon'),
+		label: 'configs',
+		root: join(root, 'configs'),
 	},
 	{
 		kind: 'materials',
-		label: 'materials_extracted_xeon',
-		root: join(root, 'materials_extracted_xeon'),
+		label: 'materials',
+		root: join(root, 'materials'),
 	},
 	{
 		kind: 'shaders',
-		label: 'shaders_extracted_xeon',
-		root: join(root, 'shaders_extracted_xeon'),
+		label: 'shaders',
+		root: join(root, 'shaders'),
 	},
 ]
 
 beforeAll(async () => {
 	root = join(await mkdtemp(`${tmpdir()}/render-pipeline-`), 'x')
 	await writeFixture(
-		'configs_extracted_xeon/assets/weapons/items/lmg/20179_item.json',
+		'configs/assets/weapons/items/lmg/20179_item.json',
 		JSON.stringify([
 			{
 				type: 'weapon',
@@ -63,43 +63,43 @@ beforeAll(async () => {
 		])
 	)
 	await writeFixture(
-		'materials_extracted_xeon/assets/weapons/models/weapons/6p62/6p62.mcmtl',
+		'materials/assets/weapons/models/weapons/6p62/6p62.mcmtl',
 		'# synthetic test corpus\nmtlType Weapon\n\nnewmtl bullets\nversion 2\nlighting model pbr\ndiffuse color 1 1 1\ndiffuse map weapons:models/sleeves/sleeves_diff.dds\nspecular map weapons:models/sleeves/sleeves_spek.dds\nalpha as gloss true\n\nnewmtl 6P62_1\nversion 2\nlighting model pbr\ndiffuse map weapons:models/weapons/6p62/6p62_1_diff.dds\nnormal map weapons:models/weapons/6p62/6p62_1_nrm.dds\nalpha transparency true\nalpha blending true\nalpha factor 0.8\nskin mask hook dmap_alpha_as_dual_skin_mask\n'
 	)
 	await writeFixture(
-		'materials_extracted_xeon/assets/weapons/models/weapons/6p62/lod/6p62_lod.mcmtl',
+		'materials/assets/weapons/models/weapons/6p62/lod/6p62_lod.mcmtl',
 		'mtlType Weapon\nnewmtl 6P62_1\nlighting model base\ndiffuse map tests:relative_sibling.dds\n'
 	)
 	await writeFixture(
-		'materials_extracted_xeon/assets/weapons/models/weapons/6p62/lod/paint_spek.dds',
+		'materials/assets/weapons/models/weapons/6p62/lod/paint_spek.dds',
 		'binary'
 	)
 	await writeFixture(
-		'materials_extracted_xeon/assets/weapons/models/weapons/6p62/6p62.mcsb',
+		'materials/assets/weapons/models/weapons/6p62/6p62.mcsb',
 		'binary'
 	)
 	await writeFixture(
-		'materials_extracted_xeon/assets/weapons/models/weapons/6p62/6p62.mcsb',
+		'materials/assets/weapons/models/weapons/6p62/6p62.mcsb',
 		'binary'
 	)
 	await writeFixture(
-		'shaders_extracted_xeon/assets/effects/shaders/mcsa130.vert',
+		'shaders/assets/effects/shaders/mcsa130.vert',
 		'#version 430\n#include module/light.vert\n#uniform_definitions\nvoid main(){}\n'
 	)
 	await writeFixture(
-		'shaders_extracted_xeon/assets/effects/shaders/module/light.vert',
+		'shaders/assets/effects/shaders/module/light.vert',
 		'uniform vec4 test;\n'
 	)
 	await writeFixture(
-		'shaders_extracted_xeon/assets/effects/shaders/mcsahook/phantom.fsh',
+		'shaders/assets/effects/shaders/mcsahook/phantom.fsh',
 		'emissionMapColor *= 0.5;\n'
 	)
 	await writeFixture(
-		'shaders_extracted_xeon/assets/effects/shaders/CaseSensitive.frag',
+		'shaders/assets/effects/shaders/CaseSensitive.frag',
 		'void a(){}\n'
 	)
 	await writeFixture(
-		'shaders_extracted_xeon/assets/effects/shaders/casesensitive.frag',
+		'shaders/assets/effects/shaders/casesensitive.frag',
 		'void b(){}\n'
 	)
 })
@@ -118,9 +118,9 @@ test('source set detection resolves the three roots under RENDER_SOURCE_ROOT', a
 	const detected = await detectSourceSet({ RENDER_SOURCE_ROOT: root })
 	expect(detected.status).toBe('ok')
 	const individual = detectSourceSet({
-		RENDER_CONFIGS_ROOT: join(root, 'configs_extracted_xeon'),
-		RENDER_MATERIALS_ROOT: join(root, 'materials_extracted_xeon'),
-		RENDER_SHADERS_ROOT: join(root, 'shaders_extracted_xeon'),
+		RENDER_CONFIGS_ROOT: join(root, 'configs'),
+		RENDER_MATERIALS_ROOT: join(root, 'materials'),
+		RENDER_SHADERS_ROOT: join(root, 'shaders'),
 	})
 	await expect(individual).resolves.toMatchObject({ status: 'ok' })
 	const missing = await detectSourceSet({})

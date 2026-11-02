@@ -19,21 +19,21 @@
 
 По `_manifest.json` и фактическому обходу материалов:
 
-- `configs_extracted_xeon`: 6 233 файла; среди них 837 файлов `weapons/items`, 362 `weapons/anims`, 1 596 `effects/weather`, 904 `effects/particles`, 457 `highpoly/character`.
-- `shaders_extracted_xeon`: 333 файла, в том числе 212 в `effects/shaders`.
-- `materials_extracted_xeon`: 10 533 MCMTL-файла. Внутри найдено 9 610 деклараций `lighting model base`, 7 182 `pbr`, 1 614 `glass`, 212 `unlit`. Это количества деклараций, **не** уникальных файлов. Встречаются также `1`, `2`, `body`, `basee`: их семантику нельзя автоматически приравнивать к известному режиму.
+- `configs`: 6 233 файла; среди них 837 файлов `weapons/items`, 362 `weapons/anims`, 1 596 `effects/weather`, 904 `effects/particles`, 457 `highpoly/character`.
+- `shaders`: 333 файла, в том числе 212 в `effects/shaders`.
+- `materials`: 10 533 MCMTL-файла. Внутри найдено 9 610 деклараций `lighting model base`, 7 182 `pbr`, 1 614 `glass`, 212 `unlit`. Это количества деклараций, **не** уникальных файлов. Встречаются также `1`, `2`, `body`, `basee`: их семантику нельзя автоматически приравнивать к известному режиму.
 
 Примеры, определяющие архитектуру:
 
-1. `configs_extracted_xeon/assets/weapons/items/lmg/20179_6p62.json:107` задаёт модель, MCMTL и LOD; строки 123–128 — поворот и масштаб. Строки 171–176 ссылаются на внешний MCVD и SAC. Следовательно, отсутствие clips в самой геометрии не означает отсутствие анимации предмета.
-2. `materials_extracted_xeon/assets/weapons/models/weapons/6p62/6p62.mcmtl:17` содержит PBR, отдельные specular/gloss maps, `alpha as gloss` и dual skin mask. Полностью металлический стандартный материал это не воспроизводит.
-3. `materials_extracted_xeon/assets/stalker/models/armor/kim_topaz/topaz.mcmtl:5` задаёт отдельные transparency/blending/factor для стекла и другой материал тела. Нельзя скрывать все линзы по имени mesh.
-4. `configs_extracted_xeon/assets/gameobjects/material_patchs.json:1` задаёт patches `frozen`, `snowed`, `inside` и параметры shader hooks.
-5. `configs_extracted_xeon/assets/effects/weather/styles/[BASE WEATHER]/[DUNGEON] Enlightened.json:4` содержит наследование по `parentStyleID`, локализованные имена настроек и locked-поля. Нужен resolver, а не чтение одного JSON.
-6. `configs_extracted_xeon/assets/effects/particles/weapons/flash/fp_flash_default_flashhider.efkefc.json:1` содержит только параметры/привязку к кости; это не полное описание бинарной системы частиц.
-7. `shaders_extracted_xeon/assets/effects/shaders/mcsa130.vert:95` восстанавливает bitangent из упакованных W-компонент; далее использует квантизацию, skinning, UV2, vertex colors и blend shapes.
-8. `shaders_extracted_xeon/assets/effects/shaders/mcsa130.frag:179` восстанавливает Z нормали из XY; gloss/specular выбираются по каналам, PBR использует собственную BRDF LUT и envmaps. Строки 388–435 определяют emission/bloom, exposure, fog, tone mapping, gamma и premultiplied alpha.
-9. `shaders_extracted_xeon/assets/effects/shaders/module/light.frag:25` использует SSBO/std430, а строка 36 — `samplerCubeArrayShadow`. В `grass430.vert:1` указан GLSL 430; есть также geometry shaders. Это не непосредственно исполняемый WebGL2-пакет.
+1. `configs/assets/weapons/items/lmg/20179_6p62.json:107` задаёт модель, MCMTL и LOD; строки 123–128 — поворот и масштаб. Строки 171–176 ссылаются на внешний MCVD и SAC. Следовательно, отсутствие clips в самой геометрии не означает отсутствие анимации предмета.
+2. `materials/assets/weapons/models/weapons/6p62/6p62.mcmtl:17` содержит PBR, отдельные specular/gloss maps, `alpha as gloss` и dual skin mask. Полностью металлический стандартный материал это не воспроизводит.
+3. `materials/assets/stalker/models/armor/kim_topaz/topaz.mcmtl:5` задаёт отдельные transparency/blending/factor для стекла и другой материал тела. Нельзя скрывать все линзы по имени mesh.
+4. `configs/assets/gameobjects/material_patchs.json:1` задаёт patches `frozen`, `snowed`, `inside` и параметры shader hooks.
+5. `configs/assets/effects/weather/styles/[BASE WEATHER]/[DUNGEON] Enlightened.json:4` содержит наследование по `parentStyleID`, локализованные имена настроек и locked-поля. Нужен resolver, а не чтение одного JSON.
+6. `configs/assets/effects/particles/weapons/flash/fp_flash_default_flashhider.efkefc.json:1` содержит только параметры/привязку к кости; это не полное описание бинарной системы частиц.
+7. `shaders/assets/effects/shaders/mcsa130.vert:95` восстанавливает bitangent из упакованных W-компонент; далее использует квантизацию, skinning, UV2, vertex colors и blend shapes.
+8. `shaders/assets/effects/shaders/mcsa130.frag:179` восстанавливает Z нормали из XY; gloss/specular выбираются по каналам, PBR использует собственную BRDF LUT и envmaps. Строки 388–435 определяют emission/bloom, exposure, fog, tone mapping, gamma и premultiplied alpha.
+9. `shaders/assets/effects/shaders/module/light.frag:25` использует SSBO/std430, а строка 36 — `samplerCubeArrayShadow`. В `grass430.vert:1` указан GLSL 430; есть также geometry shaders. Это не непосредственно исполняемый WebGL2-пакет.
 
 ## 3. Разрыв с текущей реализацией
 
