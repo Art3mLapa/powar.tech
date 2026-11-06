@@ -12,7 +12,7 @@ export const usernameSchema = z
 export const passwordSchema = z.string().min(12).max(128)
 export const registerSchema = z
 	.object({
-		token: z.string().min(32).max(128),
+		token: z.string().trim().min(32).max(128),
 		username: usernameSchema,
 		password: passwordSchema,
 	})

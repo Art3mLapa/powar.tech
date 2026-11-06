@@ -68,5 +68,6 @@ export async function renewOwnerInvitation(inputUsername: string) {
 		})
 		await audit(tx, null, 'owner.invitation-renew', username)
 	})
-	return { url: `${env.WEB_ORIGIN}/auth/register#token=${raw}` }
+	const fragment = new URLSearchParams({ token: raw, username })
+	return { url: `${env.WEB_ORIGIN}/auth/register#${fragment.toString()}` }
 }
