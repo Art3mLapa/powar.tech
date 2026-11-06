@@ -64,10 +64,47 @@ export async function invite(
 		})
 		await audit(tx, actorId, 'invitation.create', username)
 	})
+	const fragment = new URLSearchParams({ token: raw, username })
 	return {
-		url: `${env.WEB_ORIGIN}/auth/register#token=${raw}`,
+		url: `${env.WEB_ORIGIN}/auth/register#${fragment.toString()}`,
 		expiresIn: 86400,
 	}
+}
+function isMigratedInvitationUsername(id: string, username: string) {
+	const compact = id.replaceAll('-', '')
+	if (username === `invite_${compact.slice(0, 25)}`) return true
+	return (
+		username.startsWith(`invite_${compact.slice(0, 20)}`) &&
+		/^invite_[a-f0-9]{20,25}(?:_\d+)?$/.test(username)
+	)
+}
+function assertInvitation(
+	invitation: {
+		id: string
+		usedAt: string | null
+		username: string
+		expiresAt: string
+	},
+	username: string
+) {
+	if (invitation.usedAt)
+		throw new ApiError(
+			400,
+			'Приглашение уже использовано. Если аккаунт создан, войдите и завершите подключение 2FA.'
+		)
+	if (Date.parse(invitation.expiresAt) <= Date.now())
+		throw new ApiError(
+			400,
+			'Срок действия приглашения истёк. Запросите новое.'
+		)
+	if (
+		invitation.username !== username &&
+		!isMigratedInvitationUsername(invitation.id, invitation.username)
+	)
+		throw new ApiError(
+			400,
+			`Приглашение выпущено для username «${invitation.username}».`
+		)
 }
 export async function register(input: z.infer<typeof registerSchema>) {
 	const pending = requireValue(
@@ -75,12 +112,7 @@ export async function register(input: z.infer<typeof registerSchema>) {
 		400,
 		'Приглашение недействительно'
 	)
-	if (
-		pending.usedAt ||
-		pending.username !== input.username ||
-		Date.parse(pending.expiresAt) <= Date.now()
-	)
-		throw new ApiError(400, 'Приглашение недействительно')
+	assertInvitation(pending, input.username)
 	const passwordHash = await Bun.password.hash(input.password, {
 		algorithm: 'argon2id',
 		memoryCost: 65536,
@@ -98,15 +130,22 @@ export async function register(input: z.infer<typeof registerSchema>) {
 			400,
 			'Приглашение недействительно'
 		)
-		if (
-			invitation.usedAt ||
-			invitation.username !== input.username ||
-			Date.parse(invitation.expiresAt) <= Date.now()
-		)
-			throw new ApiError(400, 'Приглашение недействительно')
+		assertInvitation(invitation, input.username)
 		const role = roleSchema.safeParse(invitation.role)
 		if (!role.success)
 			throw new ApiError(400, 'Приглашение недействительно')
+		if (await tx.orm.public.User.first({ username: input.username }))
+			throw new ApiError(409, 'Аккаунт уже существует')
+		if (
+			invitation.username !== input.username &&
+			(await tx.orm.public.Invitation.first({
+				username: input.username,
+			}))
+		)
+			throw new ApiError(
+				409,
+				'Приглашение для этого username уже существует'
+			)
 		const user = await tx.orm.public.User.create({
 			username: input.username,
 			role: role.data,
@@ -115,6 +154,9 @@ export async function register(input: z.infer<typeof registerSchema>) {
 		})
 		await tx.orm.public.Invitation.where({ id: invitation.id }).update({
 			usedAt: new Date().toISOString(),
+			...(invitation.username === input.username
+				? {}
+				: { username: input.username }),
 		})
 		await tx.orm.public.AuthChallenge.create({
 			id: hash(raw),

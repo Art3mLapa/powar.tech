@@ -18,6 +18,70 @@ type Enrollment = {
 	issuer?: string
 }
 
+type StoredEnrollment = {
+	path: string
+	enrollment: Enrollment
+}
+
+const invitationTokenKey = 'bscp:invitation-token'
+const invitationUsernameKey = 'bscp:invitation-username'
+const enrollmentKey = 'bscp:auth-enrollment'
+
+function readStorage(key: string) {
+	try {
+		return window.sessionStorage.getItem(key)
+	} catch {
+		return null
+	}
+}
+
+function writeStorage(key: string, value: string | null) {
+	try {
+		if (value === null) window.sessionStorage.removeItem(key)
+		else window.sessionStorage.setItem(key, value)
+		return true
+	} catch {
+		return false
+	}
+}
+
+function readEnrollment() {
+	const raw = readStorage(enrollmentKey)
+	if (!raw) return null
+	try {
+		const stored = JSON.parse(raw) as Partial<StoredEnrollment>
+		if (
+			stored.path !== window.location.pathname ||
+			typeof stored.enrollment?.challenge !== 'string'
+		)
+			return null
+		return stored.enrollment
+	} catch {
+		return null
+	}
+}
+
+function storeEnrollment(enrollment: Enrollment | null) {
+	return writeStorage(
+		enrollmentKey,
+		enrollment
+			? JSON.stringify({
+					path: window.location.pathname,
+					enrollment,
+				} satisfies StoredEnrollment)
+			: null
+	)
+}
+
+function cleanLocation() {
+	const url = new URL(window.location.href)
+	url.hash = ''
+	url.searchParams.delete('token')
+	url.searchParams.delete('username')
+	url.searchParams.delete('challenge')
+	window.history.replaceState(null, '', `${url.pathname}${url.search}`)
+}
+
 export function AuthView({ registration = false }: { registration?: boolean }) {
 	const client = useQueryClient()
 	const [token, setToken] = useState('')
@@ -33,15 +97,60 @@ export function AuthView({ registration = false }: { registration?: boolean }) {
 	const codeInput = useRef<HTMLInputElement>(null)
 
 	useEffect(() => {
-		const hash = new URLSearchParams(window.location.hash.slice(1))
-		const inviteToken = hash.get('token')
-		if (inviteToken) setToken(inviteToken)
-		const challenge = hash.get('challenge')
-		if (challenge) setEnrollment({ challenge })
-		if (window.location.hash)
-			window.history.replaceState(null, '', window.location.pathname)
+		const applyLocation = () => {
+			const hash = new URLSearchParams(window.location.hash.slice(1))
+			const search = new URLSearchParams(window.location.search)
+			const inviteToken = (
+				hash.get('token') ??
+				search.get('token') ??
+				''
+			).trim()
+			const inviteUsername = (
+				hash.get('username') ??
+				search.get('username') ??
+				''
+			).trim()
+			const challenge = (
+				hash.get('challenge') ??
+				search.get('challenge') ??
+				''
+			).trim()
+			const hasLocationSecret = Boolean(inviteToken || challenge)
+			let saved = true
+			if (inviteToken) {
+				setToken(inviteToken)
+				saved = writeStorage(invitationTokenKey, inviteToken) && saved
+				storeEnrollment(null)
+				if (inviteUsername) {
+					setUsername(inviteUsername)
+					saved =
+						writeStorage(invitationUsernameKey, inviteUsername) &&
+						saved
+				} else {
+					writeStorage(invitationUsernameKey, null)
+				}
+			} else if (registration) {
+				const storedToken = readStorage(invitationTokenKey)
+				if (storedToken) setToken(storedToken)
+				const storedUsername = readStorage(invitationUsernameKey)
+				if (storedUsername)
+					setUsername((current) => current || storedUsername)
+			}
+			if (challenge) {
+				const enrollment = { challenge }
+				setEnrollment(enrollment)
+				saved = storeEnrollment(enrollment) && saved
+			} else if (!inviteToken) {
+				const storedEnrollment = readEnrollment()
+				if (storedEnrollment) setEnrollment(storedEnrollment)
+			}
+			if (hasLocationSecret && saved) cleanLocation()
+		}
+		applyLocation()
+		window.addEventListener('hashchange', applyLocation)
 		setReady(true)
-	}, [])
+		return () => window.removeEventListener('hashchange', applyLocation)
+	}, [registration])
 
 	useEffect(() => {
 		if (enrollment) codeInput.current?.focus()
@@ -83,6 +192,10 @@ export function AuthView({ registration = false }: { registration?: boolean }) {
 				client.setQueryData(['me'], data.user)
 				setRecovery(data.recoveryCodes)
 				setEnrollment(null)
+				storeEnrollment(null)
+				writeStorage(invitationTokenKey, null)
+				writeStorage(invitationUsernameKey, null)
+				cleanLocation()
 				setCode('')
 				return
 			}
@@ -100,6 +213,10 @@ export function AuthView({ registration = false }: { registration?: boolean }) {
 					: { username: parsedUsername.data, password }
 			)
 			setEnrollment(data)
+			storeEnrollment(data)
+			writeStorage(invitationTokenKey, null)
+			writeStorage(invitationUsernameKey, null)
+			cleanLocation()
 			setPassword('')
 		} catch (cause) {
 			setError(errorMessage(cause))
@@ -177,8 +294,9 @@ export function AuthView({ registration = false }: { registration?: boolean }) {
 								className="border-l-2 border-red-400 px-3 py-2 text-red-200"
 								role="alert"
 							>
-								Откройте ссылку из приглашения. Без неё создать
-								аккаунт нельзя. Уже зарегистрированы?{' '}
+								В ссылке нет токена приглашения. Откройте
+								полную ссылку целиком или запросите новую.
+								Уже зарегистрированы?{' '}
 								<Link href="/auth">Войти</Link>.
 							</p>
 						)}
