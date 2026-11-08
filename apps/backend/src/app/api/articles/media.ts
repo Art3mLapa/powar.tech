@@ -113,10 +113,10 @@ export const mediaRoutes = new Elysia()
 			}
 			const file = data.get('file')
 			if (!(file instanceof File))
-				throw new ApiError(422, 'Выберите файл размером до 10 МБ')
+				throw new ApiError(422, 'Выберите файл размером до 500 МБ')
 			const prepared = await prepareUploadedFile(file, String(params.id))
 			if (!prepared)
-				throw new ApiError(422, 'Выберите файл размером до 10 МБ')
+				throw new ApiError(422, 'Выберите файл размером до 500 МБ')
 			const { encoded, mime, originalName, storageKey } = prepared
 			await writeStoredAsset(storageKey, encoded, mime)
 			const asset = await db.transaction(async (tx) => {

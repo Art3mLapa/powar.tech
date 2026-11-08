@@ -333,8 +333,8 @@ function Editor({ article }: { article: Article }) {
 			return
 		}
 		if (locked || uploadLock.current) return
-		if (file.size === 0 || file.size > 10 * 1024 * 1024) {
-			setError('Выберите файл размером до 10 МБ.')
+		if (file.size === 0 || file.size > 500 * 1024 * 1024) {
+			setError('Выберите файл размером до 500 МБ.')
 			return
 		}
 		uploadLock.current = true

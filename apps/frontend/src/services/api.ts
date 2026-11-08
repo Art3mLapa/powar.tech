@@ -3,7 +3,7 @@ import axios from 'axios'
 export const apiClient = axios.create({
 	baseURL: '/api/v1',
 	withCredentials: true,
-	timeout: 20_000,
+	timeout: 0,
 })
 export function errorMessage(error: unknown): string {
 	if (axios.isAxiosError(error))
