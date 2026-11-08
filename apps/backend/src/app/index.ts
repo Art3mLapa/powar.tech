@@ -7,6 +7,7 @@ import { checkOrigin, rateLimit } from '../lib/security'
 import { adminRoutes } from './api/admin'
 import { articlesRoutes } from './api/articles'
 import { authRoutes } from './api/auth'
+import { filesRoutes } from './api/files'
 import { patchesRoutes } from './api/patches'
 
 export function createApp() {
@@ -93,6 +94,7 @@ export function createApp() {
 				.use(authRoutes)
 				.use(articlesRoutes)
 				.use(adminRoutes)
+				.use(filesRoutes)
 				.use(patchesRoutes)
 		)
 }
