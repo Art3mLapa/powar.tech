@@ -22,25 +22,19 @@ function downloadHeaders(mime: string, name: string) {
 }
 
 export const filesRoutes = new Elysia()
-	.get(
-		'/files/:assetId',
-		{ params: assetParams },
-		async ({ params, set }) => {
-			const asset = await db.orm.public.StoredAsset.first({
-				id: params.assetId,
-				postId: null,
-				public: true,
-			})
-			if (!asset) throw new ApiError(404, 'Файл не найден')
-			const file = await readStoredAsset(asset.storageKey, asset.mime)
-			if (!file) throw new ApiError(404, 'Файл не найден')
-			Object.assign(
-				set.headers,
-				downloadHeaders(asset.mime, asset.originalName)
-			)
-			return file
-		}
-	)
+	.get('/files/:assetId', { params: assetParams }, async ({ params }) => {
+		const asset = await db.orm.public.StoredAsset.first({
+			id: params.assetId,
+			postId: null,
+			public: true,
+		})
+		if (!asset) throw new ApiError(404, 'Файл не найден')
+		const file = await readStoredAsset(asset.storageKey, asset.mime)
+		if (!file) throw new ApiError(404, 'Файл не найден')
+		return new Response(file, {
+			headers: downloadHeaders(asset.mime, asset.originalName),
+		})
+	})
 	.get('/admin/files', async ({ request }) => {
 		admin(await account(request))
 		const assets = await db.orm.public.StoredAsset.where({
