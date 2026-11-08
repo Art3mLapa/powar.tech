@@ -74,7 +74,9 @@ export function createApp() {
 			}
 			console.error(
 				'Request failed',
-				error instanceof Error ? error.name : 'UnknownError'
+				error instanceof Error
+					? `${error.name}: ${error.message}`
+					: 'UnknownError'
 			)
 			set.status = 500
 			return {
