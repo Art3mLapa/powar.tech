@@ -104,6 +104,7 @@ model StoredAsset {
   mime String
   size BigInt
   originalName String
+  description String @default("")
   postId Int?
   snapshotId String?
   public Boolean @default(false)

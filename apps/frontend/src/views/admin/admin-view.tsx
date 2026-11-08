@@ -122,6 +122,11 @@ export function AdminView() {
 								Задачи парсера и рендера
 							</Link>
 						</p>
+						<p>
+							<Link className={buttonLink} href="/admin/files">
+								Файлы и публичные ссылки
+							</Link>
+						</p>
 						{error && (
 							<p className={errorClassName} role="alert">
 								{error}

@@ -40,6 +40,7 @@ function Editor({ article }: { article: Article }) {
 	const [busy, setBusy] = useState(false)
 	const [transitioning, setTransitioning] = useState(false)
 	const [uploading, setUploading] = useState(false)
+	const [fileUploading, setFileUploading] = useState(false)
 	const [lastUpload, setLastUpload] = useState<{
 		id: string
 		url: string
@@ -75,6 +76,7 @@ function Editor({ article }: { article: Article }) {
 	const readOnly = status === 'PUBLISHED'
 	const locked = readOnly || transitioning
 	const isAdmin = !!me.data && ['OWNER', 'ADMIN'].includes(me.data.role)
+	const canUpload = isAdmin || me.data?.id === article.authorId
 
 	const save = useCallback(async () => {
 		if (inFlight.current || conflict || status === 'PUBLISHED') return null
@@ -148,11 +150,11 @@ function Editor({ article }: { article: Article }) {
 
 	useEffect(() => {
 		const beforeUnload = (event: BeforeUnloadEvent) => {
-			if (dirty || uploading) event.preventDefault()
+			if (dirty || uploading || fileUploading) event.preventDefault()
 		}
 		const beforeNavigate = (event: MouseEvent) => {
 			if (
-				(!dirty && !uploading) ||
+				(!dirty && !uploading && !fileUploading) ||
 				event.defaultPrevented ||
 				event.button !== 0 ||
 				event.metaKey ||
@@ -187,7 +189,7 @@ function Editor({ article }: { article: Article }) {
 			window.removeEventListener('beforeunload', beforeUnload)
 			document.removeEventListener('click', beforeNavigate, true)
 		}
-	}, [dirty, uploading])
+	}, [dirty, uploading, fileUploading])
 	useEffect(() => () => cancelAnimationFrame(scrollFrame.current), [])
 
 	function update(patch: Partial<Draft>) {
@@ -288,8 +290,10 @@ function Editor({ article }: { article: Article }) {
 	}
 
 	async function upload(file: File) {
-		if (!isAdmin) {
-			setError('Загрузка медиа доступна только администраторам.')
+		if (!canUpload) {
+			setError(
+				'Загрузка медиа доступна только автору статьи и администраторам.'
+			)
 			return
 		}
 		if (locked || uploadLock.current) return
@@ -318,6 +322,32 @@ function Editor({ article }: { article: Article }) {
 		} finally {
 			uploadLock.current = false
 			setUploading(false)
+		}
+	}
+
+	async function uploadFile(file: File) {
+		if (!canUpload) {
+			setError(
+				'Загрузка файлов доступна только автору статьи и администраторам.'
+			)
+			return
+		}
+		if (locked || uploadLock.current) return
+		if (file.size === 0 || file.size > 10 * 1024 * 1024) {
+			setError('Выберите файл размером до 10 МБ.')
+			return
+		}
+		uploadLock.current = true
+		setFileUploading(true)
+		setError('')
+		try {
+			const media = await articleService.file(String(article.id), file)
+			insert(`\n[${media.name}](${media.url})\n`, '', '')
+		} catch (cause) {
+			setError(errorMessage(cause))
+		} finally {
+			uploadLock.current = false
+			setFileUploading(false)
 		}
 	}
 
@@ -372,7 +402,11 @@ function Editor({ article }: { article: Article }) {
 							: lastSaved
 								? ` · сохранено ${lastSaved}`
 								: ' · все изменения сохранены'}
-					{uploading ? ' · загружаем изображение…' : ''}
+					{uploading
+						? ' · загружаем изображение…'
+						: fileUploading
+							? ' · загружаем файл…'
+							: ''}
 				</p>
 			</div>
 			<div className="mb-8 flex flex-wrap items-center gap-4">
@@ -386,7 +420,11 @@ function Editor({ article }: { article: Article }) {
 				{!readOnly && status !== 'REVIEW' && (
 					<Button
 						disabled={
-							busy || transitioning || uploading || conflict
+							busy ||
+							transitioning ||
+							uploading ||
+							fileUploading ||
+							conflict
 						}
 						onClick={() => void change('submit')}
 						type="button"
@@ -723,7 +761,7 @@ function Editor({ article }: { article: Article }) {
 				>
 					Схема
 				</Button>
-				{isAdmin && (
+				{canUpload && (
 					<label className="inline-flex cursor-pointer flex-wrap items-center gap-3">
 						{uploading ? 'Загружаем…' : 'Изображение'}
 						<input
@@ -739,9 +777,25 @@ function Editor({ article }: { article: Article }) {
 						/>
 					</label>
 				)}
-				{!isAdmin && (
+				{canUpload && (
+					<label className="inline-flex cursor-pointer flex-wrap items-center gap-3">
+						{fileUploading ? 'Загружаем файл…' : 'Файл'}
+						<input
+							className="max-w-[230px] text-sm"
+							disabled={locked || uploading || fileUploading}
+							onChange={(event) => {
+								const file = event.target.files?.[0]
+								event.target.value = ''
+								if (file) void uploadFile(file)
+							}}
+							type="file"
+						/>
+					</label>
+				)}
+				{!canUpload && (
 					<p className="text-muted text-sm">
-						Загрузка изображений доступна только администраторам.
+						Загрузка изображений и файлов доступна только автору
+						статьи и администраторам.
 					</p>
 				)}
 			</div>

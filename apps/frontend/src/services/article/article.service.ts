@@ -38,4 +38,17 @@ export const articleService = {
 			)
 		).data
 	},
+	file: async (id: string, file: File) => {
+		const data = new FormData()
+		data.set('file', file)
+		return (
+			await apiClient.post<{
+				id: string
+				name: string
+				mime: string
+				size: number
+				url: string
+			}>(`/articles/${id}/file`, data)
+		).data
+	},
 }
