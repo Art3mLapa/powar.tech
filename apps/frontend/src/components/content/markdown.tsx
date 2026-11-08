@@ -4,11 +4,15 @@ import type { ReactNode } from 'react'
 import Markdown from 'react-markdown'
 import remarkDirective from 'remark-directive'
 import remarkGfm from 'remark-gfm'
-import { detectYouTubeVideoId, isAudioLink } from '@/lib/article-embeds'
+import {
+	detectYouTubeVideoId,
+	isAudioLink,
+	isVideoLink,
+} from '@/lib/article-embeds'
 import { remarkCallouts } from '@/lib/article-markdown'
 import { AudioEmbed } from './audio-embed'
 import { MermaidDiagram } from './mermaid'
-import { VideoEmbed } from './video-embed'
+import { VideoEmbed, VideoFileEmbed } from './video-embed'
 
 function flattenText(node: ReactNode): string {
 	if (typeof node === 'string') return node
@@ -34,6 +38,14 @@ function ArticleLink({
 	const youtube = href ? detectYouTubeVideoId(href) : null
 	if (youtube) {
 		return <VideoEmbed id={youtube.id} title={label} />
+	}
+	if (href && isVideoLink(href)) {
+		return (
+			<VideoFileEmbed
+				src={href}
+				title={label || href.split('/').pop() || 'Видео'}
+			/>
+		)
 	}
 	if (href && isAudioLink(href)) {
 		return (

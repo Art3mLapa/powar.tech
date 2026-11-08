@@ -5,7 +5,7 @@ import { z } from 'zod'
 const repoRoot = resolve(fileURLToPath(new URL('../../../', import.meta.url)))
 const defaultStorageDir = resolve(repoRoot, '.runtime/storage')
 
-export const env = z
+const envSchema = z
 	.object({
 		NODE_ENV: z
 			.enum(['development', 'test', 'production'])
@@ -35,5 +35,32 @@ export const env = z
 			.string()
 			.default(defaultStorageDir)
 			.transform((value) => resolve(value)),
+		S3_ENDPOINT: z.url().optional(),
+		S3_ACCESS_KEY_ID: z.string().min(1).optional(),
+		S3_SECRET_ACCESS_KEY: z.string().min(1).optional(),
+		S3_BUCKET: z.string().min(1).optional(),
+		S3_PUBLIC_URL: z.url().optional(),
 	})
-	.parse(process.env)
+	.superRefine((value, context) => {
+		const configured = [
+			value.S3_ENDPOINT,
+			value.S3_ACCESS_KEY_ID,
+			value.S3_SECRET_ACCESS_KEY,
+			value.S3_BUCKET,
+		].filter(Boolean).length
+		if (configured > 0 && configured < 4)
+			context.addIssue({
+				code: 'custom',
+				path: ['S3_ENDPOINT'],
+				message:
+					'Для S3 укажите одновременно endpoint, access key, secret key и bucket',
+			})
+	})
+
+export const env = envSchema.parse(process.env)
+export const s3Enabled = Boolean(
+	env.S3_ENDPOINT &&
+		env.S3_ACCESS_KEY_ID &&
+		env.S3_SECRET_ACCESS_KEY &&
+		env.S3_BUCKET
+)

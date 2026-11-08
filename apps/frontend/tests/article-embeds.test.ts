@@ -1,11 +1,12 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import type { MarkdownNode } from '../src/lib/article-markdown.ts'
-import { remarkCallouts } from '../src/lib/article-markdown.ts'
 import {
 	detectYouTubeVideoId,
 	isAudioLink,
+	isVideoLink,
 } from '../src/lib/article-embeds.ts'
+import type { MarkdownNode } from '../src/lib/article-markdown.ts'
+import { remarkCallouts } from '../src/lib/article-markdown.ts'
 
 test('collage directive keeps only paragraphs with images', () => {
 	const collage: MarkdownNode = {
@@ -83,5 +84,22 @@ test('audio links are detected by extension', () => {
 		'https://example.com/book',
 	]) {
 		assert.equal(isAudioLink(href), false)
+	}
+})
+
+test('direct video links are limited to supported hosts and formats', () => {
+	for (const href of [
+		'https://kappa.lol/example',
+		'https://files.example.com/video.mp4',
+		'https://cdn.example.com/video.WEBM?download=1',
+	]) {
+		assert.equal(isVideoLink(href), true)
+	}
+	for (const href of [
+		'https://example.com/page',
+		'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+		'javascript:alert(1)',
+	]) {
+		assert.equal(isVideoLink(href), false)
 	}
 })

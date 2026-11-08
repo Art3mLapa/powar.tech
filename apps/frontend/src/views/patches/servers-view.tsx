@@ -3,7 +3,6 @@
 import { useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
 import { useState } from 'react'
-import { ContentNav } from '@/components/content/nav'
 import { Button } from '@/components/ui/button'
 import { Select } from '@/components/ui/select'
 import { apiClient, errorMessage } from '@/services/api'
@@ -48,7 +47,6 @@ export function ServersView() {
 	const latest = rows.at(-1)
 	return (
 		<>
-			<ContentNav />
 			<main className="mx-auto max-w-[1200px] px-4 py-12 pb-24 wrap-anywhere sm:px-6">
 				<p>
 					<Link href="/patches">Обновления игры</Link>

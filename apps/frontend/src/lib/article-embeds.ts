@@ -17,6 +17,14 @@ const AUDIO_EXTENSIONS = new Set([
 	'.flac',
 ])
 
+const VIDEO_EXTENSIONS = new Set(['.mp4', '.webm', '.ogv', '.mov', '.m4v'])
+const VIDEO_HOSTS = new Set([
+	'kappa.lol',
+	'www.kappa.lol',
+	'streamable.com',
+	'www.streamable.com',
+])
+
 function parseDocument(href: string) {
 	try {
 		return new URL(href)
@@ -25,9 +33,7 @@ function parseDocument(href: string) {
 	}
 }
 
-export function detectYouTubeVideoId(
-	href: string
-): { id: string } | null {
+export function detectYouTubeVideoId(href: string): { id: string } | null {
 	const url = parseDocument(href)
 	if (!url) return null
 	const host = url.hostname.toLowerCase()
@@ -43,7 +49,10 @@ export function detectYouTubeVideoId(
 		return { id: query }
 	}
 	const parts = url.pathname.split('/').filter(Boolean)
-	if (parts.length >= 2 && ['embed', 'shorts', 'live', 'v'].includes(parts[0])) {
+	if (
+		parts.length >= 2 &&
+		['embed', 'shorts', 'live', 'v'].includes(parts[0])
+	) {
 		const id = parts[1]
 		return /^[\w-]{8,15}$/.test(id) ? { id } : null
 	}
@@ -54,6 +63,21 @@ export function isAudioLink(href: string): boolean {
 	try {
 		const pathname = new URL(href).pathname.toLowerCase()
 		for (const ext of AUDIO_EXTENSIONS) {
+			if (pathname.endsWith(ext)) return true
+		}
+		return false
+	} catch {
+		return false
+	}
+}
+
+export function isVideoLink(href: string): boolean {
+	try {
+		const url = new URL(href)
+		if (detectYouTubeVideoId(href)) return false
+		if (VIDEO_HOSTS.has(url.hostname.toLowerCase())) return true
+		const pathname = url.pathname.toLowerCase()
+		for (const ext of VIDEO_EXTENSIONS) {
 			if (pathname.endsWith(ext)) return true
 		}
 		return false

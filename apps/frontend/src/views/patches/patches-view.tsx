@@ -5,7 +5,6 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRef, useState } from 'react'
-import { ContentNav } from '@/components/content/nav'
 import { Button, buttonClassName } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
@@ -169,7 +168,6 @@ export function PatchesView() {
 	})
 	return (
 		<>
-			<ContentNav />
 			<main className="mx-auto max-w-[1200px] px-4 py-12 pb-24 wrap-anywhere sm:px-6">
 				<h1 className="type-display mb-8 text-5xl sm:text-7xl">
 					Обновления игры
@@ -177,27 +175,27 @@ export function PatchesView() {
 				<div className="mb-8 flex flex-wrap items-center gap-4">
 					<Button
 						aria-pressed={tab === 'PATCH'}
-						variant={tab === 'PATCH' ? 'primary' : 'secondary'}
 						onClick={() => setTab('PATCH')}
 						type="button"
+						variant={tab === 'PATCH' ? 'primary' : 'secondary'}
 					>
 						Файлы игры
 					</Button>
 					<Button
 						aria-pressed={tab === 'BALANCE'}
-						variant={tab === 'BALANCE' ? 'primary' : 'secondary'}
 						onClick={() => setTab('BALANCE')}
 						type="button"
+						variant={tab === 'BALANCE' ? 'primary' : 'secondary'}
 					>
 						Баланс
 					</Button>
 					<Button
 						aria-pressed={tab === 'LOCALIZATION'}
+						onClick={() => setTab('LOCALIZATION')}
+						type="button"
 						variant={
 							tab === 'LOCALIZATION' ? 'primary' : 'secondary'
 						}
-						onClick={() => setTab('LOCALIZATION')}
-						type="button"
 					>
 						Локализации
 					</Button>
@@ -475,7 +473,6 @@ export function PatchView({ id }: { id: string }) {
 	}
 	return (
 		<>
-			<ContentNav />
 			<main className="mx-auto max-w-[1200px] px-4 py-12 pb-24 wrap-anywhere sm:px-6">
 				<p>
 					<Link
@@ -491,25 +488,25 @@ export function PatchView({ id }: { id: string }) {
 				<div className="mb-8 flex flex-wrap items-center gap-4">
 					<Button
 						aria-pressed={mode === 'changes'}
-						variant={mode === 'changes' ? 'primary' : 'secondary'}
 						onClick={() => selectMode('changes')}
 						type="button"
+						variant={mode === 'changes' ? 'primary' : 'secondary'}
 					>
 						Изменения
 					</Button>
 					<Button
 						aria-pressed={mode === 'files'}
-						variant={mode === 'files' ? 'primary' : 'secondary'}
 						onClick={() => selectMode('files')}
 						type="button"
+						variant={mode === 'files' ? 'primary' : 'secondary'}
 					>
 						Все файлы и модели
 					</Button>
 					<Button
 						aria-pressed={mode === 'maps'}
-						variant={mode === 'maps' ? 'primary' : 'secondary'}
 						onClick={() => selectMode('maps')}
 						type="button"
+						variant={mode === 'maps' ? 'primary' : 'secondary'}
 					>
 						Карты
 					</Button>
@@ -684,7 +681,6 @@ export function DataChangesView({ id }: { id: string }) {
 	})
 	return (
 		<>
-			<ContentNav />
 			<main className="mx-auto max-w-[1200px] px-4 py-12 pb-24 wrap-anywhere sm:px-6">
 				<p>
 					<Link
