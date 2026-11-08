@@ -74,7 +74,10 @@ export function AdminFilesView() {
 	}
 
 	async function copyLink(file: FileAsset) {
-		const url = new URL(file.url, window.location.origin).toString()
+		const url = new URL(
+			`/files/${file.id}`,
+			window.location.origin
+		).toString()
 		try {
 			await navigator.clipboard.writeText(url)
 			setCopied(file.id)
@@ -210,11 +213,11 @@ export function AdminFilesView() {
 									)}
 									<a
 										className="hover:text-accent break-all underline underline-offset-3"
-										href={file.url}
+										href={`/files/${file.id}`}
 										rel="noopener noreferrer"
 										target="_blank"
 									>
-										Открыть файл
+										Открыть страницу файла
 									</a>
 								</article>
 							))}
