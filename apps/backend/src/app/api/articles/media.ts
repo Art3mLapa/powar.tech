@@ -1,13 +1,11 @@
 import { createHash } from 'node:crypto'
-import { mkdir, rename, rm } from 'node:fs/promises'
-import { resolve } from 'node:path'
 import { db } from '@bscp/database'
 import { Elysia } from 'elysia'
 import sharp from 'sharp'
 import { z } from 'zod'
-import { env } from '../../../env'
 import { ApiError, requireValue } from '../../../lib/errors'
-import { account, lock, rateLimit } from '../../../lib/security'
+import { account, admin, lock, rateLimit } from '../../../lib/security'
+import { readStoredAsset, writeStoredAsset } from '../../../lib/storage'
 import { getOwned } from './articles.service'
 
 export const mediaRoutes = new Elysia()
@@ -20,6 +18,7 @@ export const mediaRoutes = new Elysia()
 		},
 		async ({ params, request }) => {
 			const user = await account(request)
+			admin(user)
 			const post = await getOwned(params.id, user)
 			if (post.status === 'PUBLISHED')
 				throw new ApiError(409, 'Сначала снимите статью с публикации')
@@ -66,38 +65,30 @@ export const mediaRoutes = new Elysia()
 			}
 			const digest = createHash('sha256').update(encoded).digest('hex')
 			const storageKey = `${params.id}-${digest}.webp`
-			const root = resolve(env.STORAGE_DIR)
-			await mkdir(root, { recursive: true })
-			const temporary = resolve(root, `${crypto.randomUUID()}.tmp`)
-			try {
-				await Bun.write(temporary, encoded)
-				await rename(temporary, resolve(root, storageKey))
-				const asset = await db.transaction(async (tx) => {
-					await lock(tx, `asset:${storageKey}`)
-					const existing = await tx.orm.public.StoredAsset.first({
-						storageKey,
-					})
-					if (existing) return existing
-					return tx.orm.public.StoredAsset.create({
-						id: crypto.randomUUID(),
-						storageKey,
-						mime: 'image/webp',
-						size: BigInt(encoded.length),
-						originalName:
-							file.name
-								.replaceAll('\\', '/')
-								.split('/')
-								.pop()
-								?.slice(0, 200) || 'image.webp',
-						postId: params.id,
-					})
+			await writeStoredAsset(storageKey, encoded, 'image/webp')
+			const asset = await db.transaction(async (tx) => {
+				await lock(tx, `asset:${storageKey}`)
+				const existing = await tx.orm.public.StoredAsset.first({
+					storageKey,
 				})
-				return {
-					id: asset.id,
-					url: `/api/v1/articles/media/${asset.id}`,
-				}
-			} finally {
-				await rm(temporary, { force: true })
+				if (existing) return existing
+				return tx.orm.public.StoredAsset.create({
+					id: crypto.randomUUID(),
+					storageKey,
+					mime: 'image/webp',
+					size: BigInt(encoded.length),
+					originalName:
+						file.name
+							.replaceAll('\\', '/')
+							.split('/')
+							.pop()
+							?.slice(0, 200) || 'image.webp',
+					postId: params.id,
+				})
+			})
+			return {
+				id: asset.id,
+				url: `/api/v1/articles/media/${asset.id}`,
 			}
 		}
 	)
@@ -121,10 +112,9 @@ export const mediaRoutes = new Elysia()
 				)
 			)
 				throw new ApiError(404, 'Файл не найден')
-			const file = Bun.file(resolve(env.STORAGE_DIR, asset.storageKey))
-			if (!(await file.exists()))
-				throw new ApiError(404, 'Файл не найден')
-			set.headers['content-type'] = 'image/webp'
+			const file = await readStoredAsset(asset.storageKey, asset.mime)
+			if (!file) throw new ApiError(404, 'Файл не найден')
+			set.headers['content-type'] = asset.mime
 			set.headers['cache-control'] = 'no-store'
 			return file
 		}

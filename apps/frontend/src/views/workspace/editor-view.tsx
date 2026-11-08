@@ -7,7 +7,6 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { ArticleMarkdown } from '@/components/content/markdown'
-import { ContentNav } from '@/components/content/nav'
 import { Button } from '@/components/ui/button'
 import {
 	articleStatusLabels,
@@ -289,6 +288,10 @@ function Editor({ article }: { article: Article }) {
 	}
 
 	async function upload(file: File) {
+		if (!isAdmin) {
+			setError('Загрузка медиа доступна только администраторам.')
+			return
+		}
 		if (locked || uploadLock.current) return
 		if (
 			!['image/png', 'image/jpeg', 'image/webp'].includes(file.type) ||
@@ -720,20 +723,42 @@ function Editor({ article }: { article: Article }) {
 				>
 					Схема
 				</Button>
-				<label className="inline-flex cursor-pointer flex-wrap items-center gap-3">
-					{uploading ? 'Загружаем…' : 'Изображение'}
-					<input
-						accept="image/png,image/jpeg,image/webp"
-						className="max-w-[230px] text-sm"
-						disabled={locked || uploading}
-						onChange={(event) => {
-							const file = event.target.files?.[0]
-							event.target.value = ''
-							if (file) void upload(file)
-						}}
-						type="file"
-					/>
-				</label>
+				{isAdmin && (
+					<label className="inline-flex cursor-pointer flex-wrap items-center gap-3">
+						{uploading ? 'Загружаем…' : 'Изображение'}
+						<input
+							accept="image/png,image/jpeg,image/webp"
+							className="max-w-[230px] text-sm"
+							disabled={locked || uploading}
+							onChange={(event) => {
+								const file = event.target.files?.[0]
+								event.target.value = ''
+								if (file) void upload(file)
+							}}
+							type="file"
+						/>
+					</label>
+				)}
+				{!isAdmin && (
+					<p className="text-muted text-sm">
+						Загрузка изображений доступна только администраторам.
+					</p>
+				)}
+			</div>
+			<div className="mb-4 flex flex-wrap gap-2">
+				<Button
+					disabled={locked}
+					onClick={() =>
+						insert(
+							'\n[Смотреть видео](https://www.youtube.com/watch?v=)',
+							'\n',
+							''
+						)
+					}
+					type="button"
+				>
+					Видео YouTube
+				</Button>
 			</div>
 			<details className="my-4">
 				<summary className="cursor-pointer">
@@ -748,10 +773,11 @@ function Editor({ article }: { article: Article }) {
 				<p>
 					Поддерживаются таблицы, списки задач и блоки :::note,
 					:::warning, :::tip, :::info, :::collage (изображения в блоке
-					складываются в сетку-коллаж). Ссылка на YouTube превращается в
-					видеокарточку, ссылка на аудиофайл (mp3 и т.д.) — в
-					аудиоплеер. Блок ```mermaid превращается в схему. HTML и
-					JavaScript не выполняются.
+					складываются в сетку-коллаж). Ссылка на YouTube превращается
+					в видеокарточку, ссылка на kappa.lol или прямой
+					mp4/webm-файл — в видеоплеер, ссылка на аудиофайл (mp3 и
+					т.д.) — в аудиоплеер. Блок ```mermaid превращается в схему.
+					HTML и JavaScript не выполняются.
 				</p>
 			</details>
 			<label className="mb-6 flex items-center gap-2">
@@ -887,33 +913,30 @@ function Editor({ article }: { article: Article }) {
 export function EditorView({ id }: { id: string }) {
 	const article = useQuery(articleQueries.get(id))
 	return (
-		<>
-			<ContentNav />
-			<main className="mx-auto max-w-[1500px] px-4 py-12 pb-24 wrap-anywhere sm:px-6">
-				{article.isPending ? (
-					<p role="status">Загружаем редактор…</p>
-				) : article.error ? (
-					<div className="grid gap-6">
-						<p
-							className="border-l-2 border-red-400 px-3 py-2 text-red-200"
-							role="alert"
+		<main className="mx-auto max-w-[1500px] px-4 py-12 pb-24 wrap-anywhere sm:px-6">
+			{article.isPending ? (
+				<p role="status">Загружаем редактор…</p>
+			) : article.error ? (
+				<div className="grid gap-6">
+					<p
+						className="border-l-2 border-red-400 px-3 py-2 text-red-200"
+						role="alert"
+					>
+						{errorMessage(article.error)}
+					</p>
+					<div className="mb-8 flex flex-wrap items-center gap-4">
+						<Button
+							onClick={() => void article.refetch()}
+							type="button"
 						>
-							{errorMessage(article.error)}
-						</p>
-						<div className="mb-8 flex flex-wrap items-center gap-4">
-							<Button
-								onClick={() => void article.refetch()}
-								type="button"
-							>
-								Повторить загрузку
-							</Button>
-							<Link href="/auth">Войти</Link>
-						</div>
+							Повторить загрузку
+						</Button>
+						<Link href="/auth">Войти</Link>
 					</div>
-				) : (
-					<Editor article={article.data} key={id} />
-				)}
-			</main>
-		</>
+				</div>
+			) : (
+				<Editor article={article.data} key={id} />
+			)}
+		</main>
 	)
 }

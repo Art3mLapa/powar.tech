@@ -4,6 +4,7 @@ import { Icon } from '@iconify/react'
 import { motion, useScroll, useTransform } from 'motion/react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { useTheme } from 'next-themes'
 import { useReducedMotionPreference } from '../../components/use-reduced-motion'
 
@@ -15,6 +16,8 @@ export function SiteHeader() {
 	const { scrollY } = useScroll()
 	const reduced = useReducedMotionPreference()
 	const { resolvedTheme, setTheme } = useTheme()
+	const pathname = usePathname()
+	const isArticles = pathname.startsWith('/articles')
 
 	const sidesOpacity = useTransform(
 		scrollY,
@@ -82,7 +85,13 @@ export function SiteHeader() {
 					visibility: titleVisibility,
 				}}
 			>
-				Билдерс СЗ Продакшн
+				{isArticles ? (
+					<Link aria-label="Главное меню статей" href="/articles">
+						БСЗП
+					</Link>
+				) : (
+					'Билдерс СЗ Продакшн'
+				)}
 			</motion.div>
 			<motion.nav
 				aria-label="Разделы"

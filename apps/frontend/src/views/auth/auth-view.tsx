@@ -6,7 +6,6 @@ import Image from 'next/image'
 import Link from 'next/link'
 import QRCode from 'qrcode'
 import { useEffect, useRef, useState } from 'react'
-import { ContentNav } from '@/components/content/nav'
 import { Button, buttonClassName } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { apiClient, errorMessage } from '@/services/api'
@@ -238,7 +237,6 @@ export function AuthView({ registration = false }: { registration?: boolean }) {
 
 	return (
 		<>
-			<ContentNav />
 			<main className="mx-auto max-w-[620px] px-4 py-12 pb-24 wrap-anywhere sm:px-6">
 				<h1 className="type-display mb-8 text-5xl sm:text-7xl">
 					{recovery
@@ -277,9 +275,9 @@ export function AuthView({ registration = false }: { registration?: boolean }) {
 									'secondary',
 									'w-full'
 								)}
-								href="/workspace"
+								href="/articles"
 							>
-								Открыть редакцию
+								Перейти к статьям
 							</Link>
 						</div>
 					</div>

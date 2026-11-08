@@ -5,7 +5,6 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useRef, useState } from 'react'
-import { ContentNav } from '@/components/content/nav'
 import { Button, buttonClassName } from '@/components/ui/button'
 import { articleStatusLabels } from '@/lib/article-editor'
 import { articleQueries } from '@/queries/article/article.queries'
@@ -41,7 +40,6 @@ export function WorkspaceView() {
 
 	return (
 		<>
-			<ContentNav />
 			<main className="mx-auto max-w-[1200px] px-4 py-12 pb-24 wrap-anywhere sm:px-6">
 				<h1 className="type-display mb-8 text-5xl sm:text-7xl">
 					Редакция

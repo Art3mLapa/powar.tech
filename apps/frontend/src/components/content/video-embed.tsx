@@ -35,7 +35,30 @@ export function VideoEmbed({ id, title }: { id: string; title: string }) {
 				</button>
 			)}
 			{title ? (
-				<figcaption className="article-video-caption">{title}</figcaption>
+				<figcaption className="article-video-caption">
+					{title}
+				</figcaption>
+			) : null}
+		</figure>
+	)
+}
+
+export function VideoFileEmbed({ src, title }: { src: string; title: string }) {
+	return (
+		<figure className="article-video-figure">
+			{/* biome-ignore lint/a11y/useMediaCaption: внешние ролики не предоставляют отдельную дорожку субтитров */}
+			<video
+				className="article-video-file"
+				controls
+				preload="metadata"
+				src={src}
+			>
+				Ваш браузер не поддерживает встроенное видео.
+			</video>
+			{title ? (
+				<figcaption className="article-video-caption">
+					{title}
+				</figcaption>
 			) : null}
 		</figure>
 	)

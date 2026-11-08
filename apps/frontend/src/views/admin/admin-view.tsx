@@ -4,7 +4,6 @@ import { type Account, type Article, usernameSchema } from '@bscp/contracts'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import Link from 'next/link'
 import { type ReactNode, useRef, useState } from 'react'
-import { ContentNav } from '@/components/content/nav'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
@@ -99,7 +98,6 @@ export function AdminView() {
 
 	return (
 		<>
-			<ContentNav />
 			<main className="mx-auto max-w-[1200px] px-4 py-12 pb-24 wrap-anywhere sm:px-6">
 				<h1 className="type-display mb-8 text-5xl sm:text-7xl">
 					Администрирование
