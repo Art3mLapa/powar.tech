@@ -22,6 +22,27 @@ function downloadHeaders(mime: string, name: string) {
 }
 
 export const filesRoutes = new Elysia()
+	.get(
+		'/files/:assetId/info',
+		{ params: assetParams },
+		async ({ params }) => {
+			const asset = await db.orm.public.StoredAsset.first({
+				id: params.assetId,
+				postId: null,
+				public: true,
+			})
+			if (!asset) throw new ApiError(404, 'Файл не найден')
+			return {
+				id: asset.id,
+				name: asset.originalName,
+				description: asset.description,
+				mime: asset.mime,
+				size: Number(asset.size),
+				createdAt: asset.createdAt,
+				downloadUrl: publicFileUrl(asset.id),
+			}
+		}
+	)
 	.get('/files/:assetId', { params: assetParams }, async ({ params }) => {
 		const asset = await db.orm.public.StoredAsset.first({
 			id: params.assetId,
