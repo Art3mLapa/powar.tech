@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto'
 
-export const MAX_FILE_SIZE = 10 * 1024 * 1024
+export const MAX_FILE_SIZE = 500 * 1024 * 1024
 const BLOCKED_FILE_TYPES = new Set([
 	'html',
 	'htm',

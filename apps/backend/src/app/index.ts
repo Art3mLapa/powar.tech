@@ -10,8 +10,12 @@ import { authRoutes } from './api/auth'
 import { filesRoutes } from './api/files'
 import { patchesRoutes } from './api/patches'
 
+const MAX_REQUEST_BODY_SIZE = 502 * 1024 * 1024
+
 export function createApp() {
-	return new Elysia({ serve: { maxRequestBodySize: 12 * 1024 * 1024 } })
+	return new Elysia({
+		serve: { maxRequestBodySize: MAX_REQUEST_BODY_SIZE },
+	})
 		.onRequest(async ({ request, set, server }) => {
 			set.headers['x-request-id'] = crypto.randomUUID()
 			set.headers['x-content-type-options'] = 'nosniff'

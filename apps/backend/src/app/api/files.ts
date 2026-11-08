@@ -90,7 +90,7 @@ export const filesRoutes = new Elysia()
 		}
 		const file = data.get('file')
 		if (!(file instanceof File))
-			throw new ApiError(422, 'Выберите файл размером до 10 МБ')
+			throw new ApiError(422, 'Выберите файл размером до 500 МБ')
 		const descriptionValue = data.get('description')
 		if (
 			typeof descriptionValue === 'string' &&
@@ -102,7 +102,7 @@ export const filesRoutes = new Elysia()
 			)
 		const prepared = await prepareUploadedFile(file, 'standalone')
 		if (!prepared)
-			throw new ApiError(422, 'Выберите файл размером до 10 МБ')
+			throw new ApiError(422, 'Выберите файл размером до 500 МБ')
 		const description =
 			typeof descriptionValue === 'string' ? descriptionValue.trim() : ''
 		await writeStoredAsset(
