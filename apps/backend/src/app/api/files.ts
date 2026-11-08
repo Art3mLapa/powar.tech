@@ -31,9 +31,12 @@ export const filesRoutes = new Elysia()
 		if (!asset) throw new ApiError(404, 'Файл не найден')
 		const file = await readStoredAsset(asset.storageKey, asset.mime)
 		if (!file) throw new ApiError(404, 'Файл не найден')
-		return new Response(file, {
-			headers: downloadHeaders(asset.mime, asset.originalName),
-		})
+		const response = new Response(file)
+		for (const [name, value] of Object.entries(
+			downloadHeaders(asset.mime, asset.originalName)
+		))
+			response.headers.set(name, value)
+		return response
 	})
 	.get('/admin/files', async ({ request }) => {
 		admin(await account(request))
