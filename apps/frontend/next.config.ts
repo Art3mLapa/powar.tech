@@ -6,6 +6,11 @@ const config: NextConfig = {
 	output: 'standalone',
 	outputFileTracingRoot: root,
 	turbopack: { root },
+	experimental: {
+		// Backend принимает пакеты до 502 МБ (MAX_REQUEST_BODY_SIZE),
+		// без этого rewrite-прокси обрезает body на внутреннем лимите 10 МБ.
+		proxyClientMaxBodySize: '502mb',
+	},
 	async rewrites() {
 		return [
 			{
