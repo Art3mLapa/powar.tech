@@ -57,7 +57,11 @@ const envSchema = z
 			})
 	})
 
-export const env = envSchema.parse(process.env)
+const rawEnv = Object.fromEntries(
+	Object.entries(process.env).filter(([, value]) => value !== '')
+)
+
+export const env = envSchema.parse(rawEnv)
 export const s3Enabled = Boolean(
 	env.S3_ENDPOINT &&
 		env.S3_ACCESS_KEY_ID &&
